@@ -191,7 +191,7 @@ def reset_cube():
     rubiks_cube = [[[["b", "y", "o", "w", "r", "g"][x] for z in range(3)] for y in range(3)] for x in range(6)]
     make_move_graphic(None, [], rubiks_cube)
 def reset_cube_event(event):
-    reset_cube()
+    if bindings_are_activated: reset_cube()
 def scramble_cube(cube, scramble_moves_number):
     global cube_background, moves_seq_text
     try:
@@ -205,19 +205,20 @@ def scramble_cube(cube, scramble_moves_number):
         moves_seq.append(random.choice(moves_matrix))
     print("\n")
     print(moves_seq)
-    moves_seq_text = cube_background.create_text(float(cube_background["width"]) / 2, 50, fill = "darkblue", font = "Times 20 italic bold", text = moves_seq)
+    moves_seq_text = cube_background.create_text(float(cube_background["width"]) / 2, 30, fill = "darkblue", font = "Times 20 italic bold", text = moves_seq)
     make_move_graphic(None, [""] + moves_seq, cube)
 def scramble_cube_event(event):
     global rubiks_cube
-    scramble_cube(rubiks_cube, 20)
+    if bindings_are_activated: scramble_cube(rubiks_cube, 20)
 def draw_rubiks_cube_event(event):
-    global rubiks_cube, cube_background, square_side_length, sides_distortion, borders_size, front_cube_side_centre_point, moves_speed
+    global rubiks_cube, square_side_length, sides_distortion, borders_width, front_cube_side_centre_point, moves_speed
+    global cube_background
     if event.widget == sides_distortion_button:
         sides_distortion = alternate_matrix_elements([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], sides_distortion)
         sides_distortion_button.configure(text = sides_distortion)
-    elif event.widget == borders_size_button:
-        borders_size = alternate_matrix_elements([0, 2, 5, 10, 20], borders_size)
-        borders_size_button.configure(text = borders_size)
+    elif event.widget == borders_width_button:
+        borders_width = alternate_matrix_elements([0, 2, 5, 10, 20], borders_width)
+        borders_width_button.configure(text = borders_width)
     elif event.widget == cube_size_button:
         square_side_length = alternate_matrix_elements([25, 50, 75, 100, 125], square_side_length)
         cube_size_button.configure(text = square_side_length)
@@ -228,7 +229,7 @@ def draw_rubiks_cube_event(event):
     front_cube_side_centre_point = [float(cube_background["width"]) / 2 - centre_offset / math.sqrt(2), float(cube_background["height"]) / 2 + centre_offset / math.sqrt(2)]
     make_move_graphic(None, [], rubiks_cube)
 
-def draw_front_cube_side(background, front_cube_side, square_side_length, borders_size, front_cube_side_centre_point):
+def draw_front_cube_side(background, front_cube_side, square_side_length, borders_width, front_cube_side_centre_point):
     fs = front_cube_side; fc = front_cube_side_centre_point; sl = square_side_length
     global fs_up_left_piece, fs_up_middle_piece, fs_up_right_piece, fs_left_middle_piece, fs_centre_piece, fs_right_middle_piece, fs_down_left_piece, fs_down_middle_piece, fs_down_right_piece
     try:
@@ -237,16 +238,16 @@ def draw_front_cube_side(background, front_cube_side, square_side_length, border
         background.delete(fs_down_left_piece); background.delete(fs_down_middle_piece); background.delete(fs_down_right_piece)
     except Exception:
         pass
-    fs_centre_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] - sl / 2, fc[0] + sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][1]), width = borders_size, outline = "black")
-    fs_up_left_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] - 3 * sl / 2, fc[0] - sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][0]), width = borders_size, outline = "black")
-    fs_up_middle_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] - 3 * sl / 2, fc[0] + sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][1]), width = borders_size, outline = "black")
-    fs_up_right_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] - 3 * sl / 2, fc[0] + 3 * sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][2]), width = borders_size, outline = "black")
-    fs_left_middle_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] - sl / 2, fc[0] - sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][0]), width = borders_size, outline = "black")
-    fs_right_middle_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] - sl / 2, fc[0] + 3 * sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][2]), width = borders_size, outline = "black")
-    fs_down_left_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] + sl / 2, fc[0] - sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][0]), width = borders_size, outline = "black")
-    fs_down_middle_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] + sl / 2, fc[0] + sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][1]), width = borders_size, outline = "black")
-    fs_down_right_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] + sl / 2, fc[0] + 3 * sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][2]), width = borders_size, outline = "black")
-def draw_up_cube_side(background, up_cube_side, square_side_length, sides_distortion, borders_size, up_cube_side_down_left_point):
+    fs_centre_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] - sl / 2, fc[0] + sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][1]), width = borders_width, outline = "black")
+    fs_up_left_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] - 3 * sl / 2, fc[0] - sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][0]), width = borders_width, outline = "black")
+    fs_up_middle_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] - 3 * sl / 2, fc[0] + sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][1]), width = borders_width, outline = "black")
+    fs_up_right_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] - 3 * sl / 2, fc[0] + 3 * sl / 2, fc[1] - sl / 2, fill = get_color(fs[0][2]), width = borders_width, outline = "black")
+    fs_left_middle_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] - sl / 2, fc[0] - sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][0]), width = borders_width, outline = "black")
+    fs_right_middle_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] - sl / 2, fc[0] + 3 * sl / 2, fc[1] + sl / 2, fill = get_color(fs[1][2]), width = borders_width, outline = "black")
+    fs_down_left_piece = background.create_rectangle(fc[0] - 3 * sl / 2, fc[1] + sl / 2, fc[0] - sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][0]), width = borders_width, outline = "black")
+    fs_down_middle_piece = background.create_rectangle(fc[0] - sl / 2, fc[1] + sl / 2, fc[0] + sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][1]), width = borders_width, outline = "black")
+    fs_down_right_piece = background.create_rectangle(fc[0] + sl / 2, fc[1] + sl / 2, fc[0] + 3 * sl / 2, fc[1] + 3 * sl / 2, fill = get_color(fs[2][2]), width = borders_width, outline = "black")
+def draw_up_cube_side(background, up_cube_side, square_side_length, sides_distortion, borders_width, up_cube_side_down_left_point):
     us = up_cube_side; udl = up_cube_side_down_left_point; ps1 = square_side_length * sides_distortion; ps2 = square_side_length; pa1 = math.radians(45); pa2 = math.radians(0)
     global us_up_left_piece, us_up_middle_piece, us_up_right_piece, us_left_middle_piece, us_centre_piece, us_right_middle_piece, us_down_left_piece, us_down_middle_piece, us_down_right_piece
     try:
@@ -255,16 +256,16 @@ def draw_up_cube_side(background, up_cube_side, square_side_length, sides_distor
         background.delete(us_down_left_piece); background.delete(us_down_middle_piece); background.delete(us_down_right_piece)
     except Exception:
         pass
-    udl2 = udl; us_down_left_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][0]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + ps2 * math.cos(pa2), udl[1] - ps2 * math.sin(pa2)]; us_down_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][1]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + 2 * ps2 * math.cos(pa2), udl[1] - 2 * ps2 * math.sin(pa2)]; us_down_right_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][2]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + ps1 * math.cos(pa1), udl[1] - ps1 * math.sin(pa1)]; us_left_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][0]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + ps1 * math.cos(pa1) + ps2 * math.cos(pa2), udl[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; us_centre_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][1]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), udl[1] - ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; us_right_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][2]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1), udl[1] - 2 * ps1 * math.sin(pa1)]; us_up_left_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][0]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), udl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; us_up_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][1]), width = borders_size, outline = "black")
-    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), udl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; us_up_right_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][2]), width = borders_size, outline = "black")
-def draw_right_cube_side(background, right_cube_side, square_side_length, sides_distortion, borders_size, right_cube_side_down_left_point):
+    udl2 = udl; us_down_left_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][0]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + ps2 * math.cos(pa2), udl[1] - ps2 * math.sin(pa2)]; us_down_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][1]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + 2 * ps2 * math.cos(pa2), udl[1] - 2 * ps2 * math.sin(pa2)]; us_down_right_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[2][2]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + ps1 * math.cos(pa1), udl[1] - ps1 * math.sin(pa1)]; us_left_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][0]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + ps1 * math.cos(pa1) + ps2 * math.cos(pa2), udl[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; us_centre_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][1]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), udl[1] - ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; us_right_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[1][2]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1), udl[1] - 2 * ps1 * math.sin(pa1)]; us_up_left_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][0]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), udl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; us_up_middle_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][1]), width = borders_width, outline = "black")
+    udl2 = [udl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), udl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; us_up_right_piece = background.create_polygon([udl2[0], udl2[1], udl2[0] + ps2 * math.cos(pa2), udl2[1] - ps2 * math.sin(pa2), udl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), udl2[0] + ps1 * math.cos(pa1), udl2[1] - ps1 * math.sin(pa1)], fill = get_color(us[0][2]), width = borders_width, outline = "black")
+def draw_right_cube_side(background, right_cube_side, square_side_length, sides_distortion, borders_width, right_cube_side_down_left_point):
     rs = right_cube_side; rdl = right_cube_side_down_left_point; ps1 = square_side_length; ps2 = square_side_length * sides_distortion; pa1 = math.radians(90); pa2 = math.radians(45)
     global rs_up_left_piece, rs_up_middle_piece, rs_up_right_piece, rs_left_middle_piece, rs_centre_piece, rs_right_middle_piece, rs_down_left_piece, rs_down_middle_piece, rs_down_right_piece
     try:
@@ -273,34 +274,37 @@ def draw_right_cube_side(background, right_cube_side, square_side_length, sides_
         background.delete(rs_down_left_piece); background.delete(rs_down_middle_piece); background.delete(rs_down_right_piece)
     except Exception:
         pass
-    rdl2 = rdl; rs_down_left_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][2]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + ps2 * math.cos(pa2), rdl[1] - ps2 * math.sin(pa2)]; rs_down_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][2]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + 2 * ps2 * math.cos(pa2), rdl[1] - 2 * ps2 * math.sin(pa2)]; rs_down_right_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][2]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + ps1 * math.cos(pa1), rdl[1] - ps1 * math.sin(pa1)]; rs_left_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][1]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + ps1 * math.cos(pa1) + ps2 * math.cos(pa2), rdl[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; rs_centre_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][1]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), rdl[1] - ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; rs_right_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][1]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1), rdl[1] - 2 * ps1 * math.sin(pa1)]; rs_up_left_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][0]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; rs_up_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][0]), width = borders_size, outline = "black")
-    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; rs_up_right_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][0]), width = borders_size, outline = "black")
+    rdl2 = rdl; rs_down_left_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][2]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + ps2 * math.cos(pa2), rdl[1] - ps2 * math.sin(pa2)]; rs_down_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][2]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + 2 * ps2 * math.cos(pa2), rdl[1] - 2 * ps2 * math.sin(pa2)]; rs_down_right_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][2]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + ps1 * math.cos(pa1), rdl[1] - ps1 * math.sin(pa1)]; rs_left_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][1]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + ps1 * math.cos(pa1) + ps2 * math.cos(pa2), rdl[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; rs_centre_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][1]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), rdl[1] - ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; rs_right_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][1]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1), rdl[1] - 2 * ps1 * math.sin(pa1)]; rs_up_left_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][0]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; rs_up_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][0]), width = borders_width, outline = "black")
+    rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; rs_up_right_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][0]), width = borders_width, outline = "black")
 def get_color(first_letter):
     color = ["blue", "yellow", "orange", "white", "red", "green"][["b", "y", "o", "w", "r", "g"].index(first_letter)]
     return color
 def make_move_graphic(event, moves_seq, cube):
-    global rubiks_cube, cube_background, square_side_length, sides_distortion, borders_size, front_cube_side_centre_point, moves_speed
+    global rubiks_cube, square_side_length, sides_distortion, borders_width, front_cube_side_centre_point, moves_speed
+    global cube_background, bindings_are_activated
     if event == None:
+        bindings_are_activated = False
         if moves_seq == []:
-            draw_front_cube_side(cube_background, cube[5], square_side_length, borders_size, front_cube_side_centre_point)
-            draw_up_cube_side(cube_background, cube[3], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
-            draw_right_cube_side(cube_background, cube[4], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
+            draw_front_cube_side(cube_background, cube[5], square_side_length, borders_width, front_cube_side_centre_point)
+            draw_up_cube_side(cube_background, cube[3], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
+            draw_right_cube_side(cube_background, cube[4], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
+            bindings_are_activated = True
         else:
             move = []
             move.append(moves_seq[0])
             rubiks_cube = make_moves_sequence(cube, move)
-            draw_front_cube_side(cube_background, rubiks_cube[5], square_side_length, borders_size, front_cube_side_centre_point)
-            draw_up_cube_side(cube_background, rubiks_cube[3], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
-            draw_right_cube_side(cube_background, rubiks_cube[4], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
+            draw_front_cube_side(cube_background, rubiks_cube[5], square_side_length, borders_width, front_cube_side_centre_point)
+            draw_up_cube_side(cube_background, rubiks_cube[3], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
+            draw_right_cube_side(cube_background, rubiks_cube[4], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
             cube_background.after(int(1000 * moves_speed), lambda: make_move_graphic(None, moves_seq[1:], rubiks_cube))
-    else:
+    elif event != None and bindings_are_activated:
         if event.keysym == "Left":
             rubiks_cube = make_moves_sequence(cube, ["y"])
         elif event.keysym == "Right":
@@ -345,9 +349,9 @@ def make_move_graphic(event, moves_seq, cube):
             rubiks_cube = make_moves_sequence(cube, ["S"])
         elif event.keysym == "S":
             rubiks_cube = make_moves_sequence(cube, ["S'"])
-        draw_front_cube_side(cube_background, rubiks_cube[5], square_side_length, borders_size, front_cube_side_centre_point)
-        draw_up_cube_side(cube_background, rubiks_cube[3], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
-        draw_right_cube_side(cube_background, rubiks_cube[4], square_side_length, sides_distortion, borders_size, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
+        draw_front_cube_side(cube_background, rubiks_cube[5], square_side_length, borders_width, front_cube_side_centre_point)
+        draw_up_cube_side(cube_background, rubiks_cube[3], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] - 3 * square_side_length / 2, front_cube_side_centre_point[1] - 3 * square_side_length / 2])
+        draw_right_cube_side(cube_background, rubiks_cube[4], square_side_length, sides_distortion, borders_width, [front_cube_side_centre_point[0] + 3 * square_side_length / 2, front_cube_side_centre_point[1] + 3 * square_side_length / 2])
     
 class menu_button():
     def __init__(self, background, button_text, button_font, button_fg, button_bg, button_xcor, button_ycor, button_func):
@@ -376,7 +380,7 @@ cube_background = tk.Canvas(root, width = cube_background_width, height = cube_b
 cube_background.grid(row = 0, column = 1, sticky = tk.NSEW)
 
 square_side_length = 100
-borders_size = 5
+borders_width = 5
 sides_distortion = 0.4
 centre_offset =  3 / 2 * sides_distortion * square_side_length
 front_cube_side_centre_point = [cube_background_width / 2 - centre_offset / math.sqrt(2), cube_background_height / 2 + centre_offset / math.sqrt(2)]
@@ -385,6 +389,7 @@ rubiks_cube = [[[["b", "y", "o", "w", "r", "g"][x] for z in range(3)] for y in r
 reset_cube()
 # scramble_cube(rubiks_cube, 20)
 
+bindings_are_activated = True
 root.bind('<Left>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<Right>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<Up>', lambda event: make_move_graphic(event, [], rubiks_cube))
@@ -408,19 +413,25 @@ root.bind('<E>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<s>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<S>', lambda event: make_move_graphic(event, [], rubiks_cube))
 
-reset_button = menu_button(menu_background, "reset", "Arial 20 bold", "white", "black", menu_background_width / 2, 40, reset_cube_event).button
-scramble_button = menu_button(menu_background, "scramble", "Arial 20 bold", "white", "black", menu_background_width / 2, 80, scramble_cube_event).button
-sides_distortion_label = menu_label(menu_background, "sides\ndistortion", "Arial 18 bold", "red", "black", menu_background_width / 2 - 40, 150).label
-sides_distortion_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", menu_background_width / 2 + 40, 150).label
-sides_distortion_button = menu_button(menu_background, sides_distortion, "Arial 20 bold", "white", "black", menu_background_width / 2 + 80, 150, draw_rubiks_cube_event).button
-borders_size_label = menu_label(menu_background, "borders\nsize", "Arial 18 bold", "red", "black", menu_background_width / 2 - 40, 230).label
-borders_size_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", menu_background_width / 2 + 40, 230).label
-borders_size_button = menu_button(menu_background, borders_size, "Arial 20 bold", "white", "black", menu_background_width / 2 + 80, 230, draw_rubiks_cube_event).button
-cube_size_label = menu_label(menu_background, "cube size", "Arial 18 bold", "red", "black", menu_background_width / 2 - 40, 300).label
-cube_size_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", menu_background_width / 2 + 40, 300).label
-cube_size_button = menu_button(menu_background, square_side_length, "Arial 20 bold", "white", "black", menu_background_width / 2 + 80, 300, draw_rubiks_cube_event).button
-moves_speed_label = menu_label(menu_background, "moves\nspeed (sec)", "Arial 18 bold", "red", "black", menu_background_width / 2 - 40, 370).label
-moves_speed_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", menu_background_width / 2 + 40, 370).label
-moves_speed_button = menu_button(menu_background, moves_speed, "Arial 20 bold", "white", "black", menu_background_width / 2 + 80, 370, draw_rubiks_cube_event).button
+reset_button = menu_button(menu_background, "reset", "Arial 25 bold", "white", "black", menu_background_width / 2, 50, reset_cube_event).button
+
+scramble_cube_menu_cors = [menu_background_width / 2, 120]
+scramble_cube_menu_label = menu_label(menu_background, "Scramble cube:", "Times 25 bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1]).label
+moves_speed_label = menu_label(menu_background, "moves\nspeed (sec)", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 30, scramble_cube_menu_cors[1] + 60).label
+moves_speed_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] + 50, scramble_cube_menu_cors[1] + 60).label
+moves_speed_button = menu_button(menu_background, moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 80, scramble_cube_menu_cors[1] + 60, draw_rubiks_cube_event).button
+scramble_button = menu_button(menu_background, "scramble", "Arial 25 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + 120, scramble_cube_event).button
+
+cube_graphics_menu_cors = [menu_background_width / 2, 320]
+cube_graphics_menu_label = menu_label(menu_background, "Cube graphics:", "Times 25 bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1]).label
+cube_size_label = menu_label(menu_background, "cube size", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 50).label
+cube_size_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 50).label
+cube_size_button = menu_button(menu_background, square_side_length, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 50, draw_rubiks_cube_event).button
+sides_distortion_label = menu_label(menu_background, "sides\ndistortion", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 110).label
+sides_distortion_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 110).label
+sides_distortion_button = menu_button(menu_background, sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 110, draw_rubiks_cube_event).button
+borders_width_label = menu_label(menu_background, "borders\nwidth", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 180).label
+borders_width_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 180).label
+borders_width_button = menu_button(menu_background, borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 180, draw_rubiks_cube_event).button
 
 root.mainloop()
