@@ -192,7 +192,7 @@ def reset_cube():
     make_move_graphic(None, [], rubiks_cube)
 def reset_cube_event(event):
     if bindings_are_activated: reset_cube()
-def scramble_cube(cube, scramble_moves_number):
+def scramble_cube(cube, moves_number):
     global cube_background, moves_seq_text
     try:
         cube_background.delete(moves_seq_text)
@@ -201,30 +201,33 @@ def scramble_cube(cube, scramble_moves_number):
     moves_seq = []
     # moves_matrix = ["L", "L'", "R", "R'", "U", "U'", "D", "D'", "F", "F'", "B", "B'", "M", "M'", "E", "E'", "S", "S'", "x", "x'", "y", "y'", "z", "z'"]
     moves_matrix = ["L", "L'", "R", "R'", "U", "U'", "D", "D'", "F", "F'", "B", "B'", "M", "M'", "E", "E'", "S", "S'"]
-    for i in range(scramble_moves_number):
+    for i in range(moves_number):
         moves_seq.append(random.choice(moves_matrix))
     print("\n")
     print(moves_seq)
-    moves_seq_text = cube_background.create_text(float(cube_background["width"]) / 2, 30, fill = "darkblue", font = "Times 20 italic bold", text = moves_seq)
+    moves_seq_text = cube_background.create_text(float(cube_background["width"]) / 2, 30, fill = "darkblue", text = moves_seq, font = "Times 20 italic bold")
     make_move_graphic(None, [""] + moves_seq, cube)
 def scramble_cube_event(event):
-    global rubiks_cube
-    if bindings_are_activated: scramble_cube(rubiks_cube, 20)
-def draw_rubiks_cube_event(event):
-    global rubiks_cube, square_side_length, sides_distortion, borders_width, front_cube_side_centre_point, moves_speed
-    global cube_background
-    if event.widget == sides_distortion_button:
+    global rubiks_cube, scramble_moves_number
+    if bindings_are_activated: scramble_cube(rubiks_cube, scramble_moves_number)
+def change_game_settings(event):
+    global rubiks_cube, square_side_length, sides_distortion, borders_width, front_cube_side_centre_point, moves_speed, scramble_moves_number
+    global cube_background, moves_speed_button, scramble_moves_number, cube_size_button, sides_distortion_button, borders_width_button
+    if event.widget == moves_speed_button:
+        moves_speed = alternate_matrix_elements([0, 0.1, 0.5, 1.0, 2.0, 5.0], moves_speed)
+        moves_speed_button.configure(text = moves_speed)
+    elif event.widget == moves_number_button:
+        scramble_moves_number = alternate_matrix_elements([1, 3, 5, 10, 20], scramble_moves_number)
+        moves_number_button.configure(text = scramble_moves_number)
+    elif event.widget == cube_size_button:
+        square_side_length = alternate_matrix_elements([25, 50, 75, 100, 125], square_side_length)
+        cube_size_button.configure(text = square_side_length)
+    elif event.widget == sides_distortion_button:
         sides_distortion = alternate_matrix_elements([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], sides_distortion)
         sides_distortion_button.configure(text = sides_distortion)
     elif event.widget == borders_width_button:
         borders_width = alternate_matrix_elements([0, 2, 5, 10, 20], borders_width)
         borders_width_button.configure(text = borders_width)
-    elif event.widget == cube_size_button:
-        square_side_length = alternate_matrix_elements([25, 50, 75, 100, 125], square_side_length)
-        cube_size_button.configure(text = square_side_length)
-    elif event.widget == moves_speed_button:
-        moves_speed = alternate_matrix_elements([0, 0.1, 0.5, 1.0, 2.0, 5.0], moves_speed)
-        moves_speed_button.configure(text = moves_speed)
     centre_offset =  3 / 2 * sides_distortion * square_side_length
     front_cube_side_centre_point = [float(cube_background["width"]) / 2 - centre_offset / math.sqrt(2), float(cube_background["height"]) / 2 + centre_offset / math.sqrt(2)]
     make_move_graphic(None, [], rubiks_cube)
@@ -283,8 +286,8 @@ def draw_right_cube_side(background, right_cube_side, square_side_length, sides_
     rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1), rdl[1] - 2 * ps1 * math.sin(pa1)]; rs_up_left_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[2][0]), width = borders_width, outline = "black")
     rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; rs_up_middle_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[1][0]), width = borders_width, outline = "black")
     rdl2 = [rdl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), rdl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; rs_up_right_piece = background.create_polygon([rdl2[0], rdl2[1], rdl2[0] + ps2 * math.cos(pa2), rdl2[1] - ps2 * math.sin(pa2), rdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), rdl2[0] + ps1 * math.cos(pa1), rdl2[1] - ps1 * math.sin(pa1)], fill = get_color(rs[0][0]), width = borders_width, outline = "black")
-def get_color(first_letter):
-    color = ["blue", "yellow", "orange", "white", "red", "green"][["b", "y", "o", "w", "r", "g"].index(first_letter)]
+def get_color(color_first_letter):
+    color = ["blue", "yellow", "orange", "white", "red", "green"][["b", "y", "o", "w", "r", "g"].index(color_first_letter)]
     return color
 def make_move_graphic(event, moves_seq, cube):
     global rubiks_cube, square_side_length, sides_distortion, borders_width, front_cube_side_centre_point, moves_speed
@@ -372,7 +375,7 @@ root.title("Rubik's cube")
 root.geometry("+0+0")
 cube_background_width = (4 / 5) * root.winfo_screenheight()
 cube_background_height = cube_background_width
-menu_background_width = cube_background_width / 3
+menu_background_width = cube_background_width / 2
 menu_background_height = cube_background_height
 menu_background = tk.Frame(root, width = menu_background_width, height = menu_background_height, bg = "black", bd = 0, relief = "solid")
 menu_background.grid(row = 0, column = 0, sticky = tk.NSEW)
@@ -385,9 +388,34 @@ sides_distortion = 0.4
 centre_offset =  3 / 2 * sides_distortion * square_side_length
 front_cube_side_centre_point = [cube_background_width / 2 - centre_offset / math.sqrt(2), cube_background_height / 2 + centre_offset / math.sqrt(2)]
 moves_speed = 0
+scramble_moves_number = 10
 rubiks_cube = [[[["b", "y", "o", "w", "r", "g"][x] for z in range(3)] for y in range(3)] for x in range(6)]
 reset_cube()
 # scramble_cube(rubiks_cube, 20)
+
+reset_button = menu_button(menu_background, "reset", "Arial 25 bold", "white", "black", menu_background_width / 2, 50, reset_cube_event).button
+
+scramble_cube_menu_cors = [menu_background_width / 2, 120]
+scramble_cube_menu_label = menu_label(menu_background, "Scramble cube:", "Times 25 bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1]).label
+moves_speed_label = menu_label(menu_background, "moves\nspeed (sec)", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 30, scramble_cube_menu_cors[1] + 60).label
+moves_speed_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] + 50, scramble_cube_menu_cors[1] + 60).label
+moves_speed_button = menu_button(menu_background, moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 80, scramble_cube_menu_cors[1] + 60, change_game_settings).button
+moves_number_label = menu_label(menu_background, "moves\nnumber", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 30, scramble_cube_menu_cors[1] + 120).label
+moves_number_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] + 50, scramble_cube_menu_cors[1] + 120).label
+moves_number_button = menu_button(menu_background, scramble_moves_number, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 80, scramble_cube_menu_cors[1] + 120, change_game_settings).button
+scramble_button = menu_button(menu_background, "scramble", "Arial 25 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + 180, scramble_cube_event).button
+
+cube_graphics_menu_cors = [menu_background_width / 2, 380]
+cube_graphics_menu_label = menu_label(menu_background, "Cube graphics:", "Times 25 bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1]).label
+cube_size_label = menu_label(menu_background, "cube size", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 50).label
+cube_size_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 50).label
+cube_size_button = menu_button(menu_background, square_side_length, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 50, change_game_settings).button
+sides_distortion_label = menu_label(menu_background, "sides\ndistortion", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 110).label
+sides_distortion_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 110).label
+sides_distortion_button = menu_button(menu_background, sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 110, change_game_settings).button
+borders_width_label = menu_label(menu_background, "borders\nwidth", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 180).label
+borders_width_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 180).label
+borders_width_button = menu_button(menu_background, borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 180, change_game_settings).button
 
 bindings_are_activated = True
 root.bind('<Left>', lambda event: make_move_graphic(event, [], rubiks_cube))
@@ -412,26 +440,5 @@ root.bind('<e>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<E>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<s>', lambda event: make_move_graphic(event, [], rubiks_cube))
 root.bind('<S>', lambda event: make_move_graphic(event, [], rubiks_cube))
-
-reset_button = menu_button(menu_background, "reset", "Arial 25 bold", "white", "black", menu_background_width / 2, 50, reset_cube_event).button
-
-scramble_cube_menu_cors = [menu_background_width / 2, 120]
-scramble_cube_menu_label = menu_label(menu_background, "Scramble cube:", "Times 25 bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1]).label
-moves_speed_label = menu_label(menu_background, "moves\nspeed (sec)", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 30, scramble_cube_menu_cors[1] + 60).label
-moves_speed_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] + 50, scramble_cube_menu_cors[1] + 60).label
-moves_speed_button = menu_button(menu_background, moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 80, scramble_cube_menu_cors[1] + 60, draw_rubiks_cube_event).button
-scramble_button = menu_button(menu_background, "scramble", "Arial 25 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + 120, scramble_cube_event).button
-
-cube_graphics_menu_cors = [menu_background_width / 2, 320]
-cube_graphics_menu_label = menu_label(menu_background, "Cube graphics:", "Times 25 bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1]).label
-cube_size_label = menu_label(menu_background, "cube size", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 50).label
-cube_size_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 50).label
-cube_size_button = menu_button(menu_background, square_side_length, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 50, draw_rubiks_cube_event).button
-sides_distortion_label = menu_label(menu_background, "sides\ndistortion", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 110).label
-sides_distortion_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 110).label
-sides_distortion_button = menu_button(menu_background, sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 110, draw_rubiks_cube_event).button
-borders_width_label = menu_label(menu_background, "borders\nwidth", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 40, cube_graphics_menu_cors[1] + 180).label
-borders_width_label2 = menu_label(menu_background, ":", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 180).label
-borders_width_button = menu_button(menu_background, borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + 180, draw_rubiks_cube_event).button
 
 root.mainloop()
