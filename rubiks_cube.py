@@ -31,15 +31,15 @@ class rubiks_cube():
         self.borders_widths_matrix = [0, 2, 5, 10]
         self.sides_distortion = 0.6
         self.sides_distortions_matrix = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-        centre_offset =  3 / 2 * self.sides_distortion * self.piece_side_length
-        self.front_cube_side_centre = [self.cube_background_width / 2 - centre_offset / math.sqrt(2), self.cube_background_height / 2 + centre_offset / math.sqrt(2)]
         self.activefill_pieces_color = "black"
         self.hidden_sides_visibility = "off"
         self.axis_visibility = "off"
-        
+        self.visible_cube_centre_x = self.cube_background_width / 2
+        self.visible_cube_centre_y = self.cube_background_height / 2
+
         # variables for hidden sides
-        self.hidden_centre_xcor = 60
-        self.hidden_centre_ycor = 80
+        self.hidden_cube_centre_x = 60
+        self.hidden_cube_centre_y = 80
         self.hidden_side_length = 20
         
         # variables for scramble
@@ -66,23 +66,26 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
         cube_graphics_menu_cors = [self.menu_background_width / 2, 120]
         self.cube_graphics_menu_label = menu_label(self.menu_background, "Cube graphics:", "Times 30 bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1]).label
         self.borders_width_label = menu_label(self.menu_background, "borders width:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 20, cube_graphics_menu_cors[1] + 60).label
-        self.borders_width_button = menu_button(self.menu_background, self.borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 90, cube_graphics_menu_cors[1] + 60, self.change_game_settings).button
+        self.borders_width_button = menu_button(self.menu_background, self.borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 90, cube_graphics_menu_cors[1] + 60, self.change_game_settings_cube_graphics).button
         self.sides_distortion_label = menu_label(self.menu_background, "sides distortion:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + 100).label
-        self.sides_distortion_button = menu_button(self.menu_background, self.sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 100, cube_graphics_menu_cors[1] + 100, self.change_game_settings).button
+        self.sides_distortion_button = menu_button(self.menu_background, self.sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 100, cube_graphics_menu_cors[1] + 100, self.change_game_settings_cube_graphics).button
         self.hidden_sides_visibility_label = menu_label(self.menu_background, "hidden sides:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + 140).label
-        self.hidden_sides_visibility_button = menu_button(self.menu_background, self.hidden_sides_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 85, cube_graphics_menu_cors[1] + 140, self.change_game_settings).button
+        self.hidden_sides_visibility_button = menu_button(self.menu_background, self.hidden_sides_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 85, cube_graphics_menu_cors[1] + 140, self.change_game_settings_cube_graphics).button
         self.axis_visibility_label = menu_label(self.menu_background, "axis:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 20, cube_graphics_menu_cors[1] + 180).label
-        self.axis_visibility_button = menu_button(self.menu_background, self.axis_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 180, self.change_game_settings).button
-        self.cube_view_button = menu_button(self.cube_background, self.cube_view, "Arial 25 bold", "darkblue", "cyan", self.cube_background_width - 50, 50, self.change_game_settings).button
-        self.cube_background.bind("<MouseWheel>", self.change_game_settings)
+        self.axis_visibility_button = menu_button(self.menu_background, self.axis_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 40, cube_graphics_menu_cors[1] + 180, self.change_game_settings_cube_graphics).button
+        self.cube_view_button = menu_button(self.cube_background, self.cube_view, "Arial 25 bold", "darkblue", "cyan", self.cube_background_width - 50, 50, self.change_game_settings_cube_graphics).button
+        self.cube_background.bind('<Button-2>', self.cube_background_mouse_events)
+        self.cube_background.bind('<B2-Motion>', self.cube_background_mouse_events)
+        self.cube_background.bind("<MouseWheel>", self.cube_background_mouse_events)
+        self.cube_background.bind("<Double-Button-2>", self.reset_cube_position)
 
         # scramble cube menu
         scramble_cube_menu_cors = [self.menu_background_width / 2, 370]
         self.scramble_cube_menu_label = menu_label(self.menu_background, "Scramble cube:", "Times 30 bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1]).label
         self.moves_speed_label = menu_label(self.menu_background, "moves speed (sec):", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + 60).label
-        self.moves_speed_button = menu_button(self.menu_background, self.moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 120, scramble_cube_menu_cors[1] + 60, self.change_game_settings).button
+        self.moves_speed_button = menu_button(self.menu_background, self.moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 120, scramble_cube_menu_cors[1] + 60, self.change_game_settings_cube_graphics).button
         self.moves_number_label = menu_label(self.menu_background, "moves number:", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + 100).label
-        self.moves_number_button = menu_button(self.menu_background, self.auto_scramble_moves, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 95, scramble_cube_menu_cors[1] + 100, self.change_game_settings).button
+        self.moves_number_button = menu_button(self.menu_background, self.auto_scramble_moves, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 95, scramble_cube_menu_cors[1] + 100, self.change_game_settings_cube_graphics).button
         self.scramble_button = menu_button(self.menu_background, "scramble", "Arial 25 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + 140, self.scramble_cube_event).button
 
         # bindings
@@ -287,13 +290,13 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
             pass
         if event == None:
             self.bindings_are_activated = False
-            self.make_move_graphic()
+            self.make_cube_graphic()
             if moves_seq != []:
                 self.cube_background.after(int(1000 * self.moves_speed), lambda: self.make_moves_sequence(moves_seq[1:]))
             else:
                 self.bindings_are_activated = True
         if self.bindings_are_activated:
-            self.make_move_graphic()
+            self.make_cube_graphic()
     def print_rubiks_cube(self, cube):
         for i in range(3):
             print("\n" + 14 * " ", end = "")
@@ -311,9 +314,9 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
                 print(piece, end = " ")
 
     def reset_cube(self):
-        self.rubiks_cube = [[[["b", "y", "o", "w", "r", "g"][x] for z in range(3)] for y in range(3)] for x in range(6)]
         self.down_area_background.delete("all")
-        self.make_moves_sequence([])
+        self.rubiks_cube = [[[["b", "y", "o", "w", "r", "g"][x] for z in range(3)] for y in range(3)] for x in range(6)]
+        self.make_cube_graphic()
     def reset_cube_event(self, event):
         if self.bindings_are_activated:
             self.reset_cube()
@@ -330,23 +333,20 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
     def scramble_cube_event(self, event):
         if self.bindings_are_activated:
             self.scramble_cube(self.auto_scramble_moves)
-    def change_game_settings(self, event):
+    def change_game_settings_cube_graphics(self, event):
         if event.widget == self.moves_speed_button:
             self.moves_speed = self.alternate_matrix_elements(self.moves_speeds_matrix, self.moves_speed)
             self.moves_speed_button.configure(text = self.moves_speed)
         elif event.widget == self.moves_number_button:
             self.auto_scramble_moves = self.alternate_matrix_elements(self.auto_scramble_moves_matrix, self.auto_scramble_moves)
             self.moves_number_button.configure(text = self.auto_scramble_moves)
-        elif event.widget == self.cube_background:
-            if event.delta == -120 and self.piece_side_length > 25:
-                self.piece_side_length -= 5
-            elif event.delta == 120 and self.piece_side_length < 150:
-                self.piece_side_length += 5
         elif event.widget == self.cube_view_button:
             self.cube_view = self.alternate_matrix_elements(self.cube_views_matrix, self.cube_view)
             self.cube_view_button.configure(text = self.cube_view)
-            if self.cube_view == "3d": self.piece_side_length = 100
-            elif self.cube_view == "2d": self.piece_side_length = 50
+            if self.cube_view == "3d":
+                self.piece_side_length = 2 * self.piece_side_length
+            elif self.cube_view == "2d":
+                self.piece_side_length = 1 / 2 * self.piece_side_length
         elif event.widget == self.sides_distortion_button:
             self.sides_distortion = self.alternate_matrix_elements(self.sides_distortions_matrix, self.sides_distortion)
             self.sides_distortion_button.configure(text = self.sides_distortion)
@@ -359,9 +359,26 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
         elif event.widget == self.axis_visibility_button:
             self.axis_visibility = self.alternate_matrix_elements(["on", "off"], self.axis_visibility)
             self.axis_visibility_button.configure(text = self.axis_visibility)
-        centre_offset =  3 / 2 * self.sides_distortion * self.piece_side_length
-        self.front_cube_side_centre = [float(self.cube_background["width"]) / 2 - centre_offset / math.sqrt(2), float(self.cube_background["height"]) / 2 + centre_offset / math.sqrt(2)]
-        self.make_move_graphic()
+        self.make_cube_graphic()
+    def cube_background_mouse_events(self, event):
+        if event.type == "38":       # MouseWheel event
+            if event.delta == -120 and self.piece_side_length > 10:
+                self.piece_side_length -= 5
+            elif event.delta == 120 and self.piece_side_length < 200:
+                self.piece_side_length += 5
+        elif event.type == "4":      # Button-2 event
+            self.lastx = event.x
+            self.lasty = event.y
+        elif event.type == "6":      # B2-Motion event
+            self.visible_cube_centre_x = self.visible_cube_centre_x + event.x - self.lastx
+            self.visible_cube_centre_y = self.visible_cube_centre_y + event.y - self.lasty
+            self.lastx = event.x
+            self.lasty = event.y
+        self.make_cube_graphic()
+    def reset_cube_position(self, event):
+        self.visible_cube_centre_x = self.cube_background_width / 2
+        self.visible_cube_centre_y = self.cube_background_height / 2
+        self.make_cube_graphic()
     def show_instructions(self, event = None):
         try:
             self.instructions_background.destroy()
@@ -394,10 +411,12 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1), cfdl[1] - 2 * ps1 * math.sin(pa1)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][0], activefill = self.activefill_pieces_color, width = borders_width, outline = "black", tags = "up_left_piece")
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), cfdl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][1], activefill = self.activefill_pieces_color, width = borders_width, outline = "black", tags = "up_middle_piece")
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), cfdl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][2], activefill = self.activefill_pieces_color, width = borders_width, outline = "black", tags = "up_right_piece")
-    def make_move_graphic(self, event = None):
+    def make_cube_graphic(self, event = None):
         self.cube_background.delete("all")
-        # for visible_cube
         if self.cube_view == "3d":
+            # for visible_cube
+            centre_offset =  3 / 2 * self.sides_distortion * self.piece_side_length / math.sqrt(2)
+            self.front_cube_side_centre = [self.visible_cube_centre_x - centre_offset, self.visible_cube_centre_y + centre_offset]
             self.draw_cube_side(self.cube_background, self.rubiks_cube[5], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.front_cube_side_centre[0] - 3 * self.piece_side_length / 2, self.front_cube_side_centre[1] + 3 * self.piece_side_length / 2])
             self.draw_cube_side(self.cube_background, self.rubiks_cube[3], self.borders_width, self.piece_side_length * self.sides_distortion, self.piece_side_length, 45, 0, [self.front_cube_side_centre[0] - 3 * self.piece_side_length / 2, self.front_cube_side_centre[1] - 3 * self.piece_side_length / 2])
             self.draw_cube_side(self.cube_background, [[self.rubiks_cube[4][2-j][i] for j in range(3)] for i in range(3)], self.borders_width, self.piece_side_length, self.piece_side_length * self.sides_distortion, 90, 45, [self.front_cube_side_centre[0] + 3 * self.piece_side_length / 2, self.front_cube_side_centre[1] + 3 * self.piece_side_length / 2])
@@ -410,25 +429,25 @@ to them. For example, R' (R prime) means R move but in the opposite direction."
                 self.cube_background.create_text(self.front_cube_side_centre[0] - 3 * self.piece_side_length / 2 - 50 / math.sqrt(2), self.front_cube_side_centre[1] + 3 * self.piece_side_length / 2 + 50 / math.sqrt(2) + 10, text = "x", font = "Times 20 bold", fill = "black", activefill = "purple")
             # for hidden_layers
             if self.hidden_sides_visibility == "on":
-                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[0][2-i][j] for j in range(3)] for i in range(3)], 0, self.hidden_side_length, self.hidden_side_length, 90, 0, [self.hidden_centre_xcor, self.hidden_centre_ycor])
-                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[2][2-j][2-i] for j in range(3)] for i in range(3)], 0, self.hidden_side_length, self.hidden_side_length * self.sides_distortion, 90, 45, [self.hidden_centre_xcor - 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2), self.hidden_centre_ycor + 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2)])
-                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[1][i][2-j] for j in range(3)] for i in range(3)], 0, self.hidden_side_length * self.sides_distortion, self.hidden_side_length, 45, 0, [self.hidden_centre_xcor - 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2), self.hidden_centre_ycor + 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2)])
+                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[0][2-i][j] for j in range(3)] for i in range(3)], 0, self.hidden_side_length, self.hidden_side_length, 90, 0, [self.hidden_cube_centre_x, self.hidden_cube_centre_y])
+                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[2][2-j][2-i] for j in range(3)] for i in range(3)], 0, self.hidden_side_length, self.hidden_side_length * self.sides_distortion, 90, 45, [self.hidden_cube_centre_x - 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2), self.hidden_cube_centre_y + 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2)])
+                self.draw_cube_side(self.cube_background, [[self.rubiks_cube[1][i][2-j] for j in range(3)] for i in range(3)], 0, self.hidden_side_length * self.sides_distortion, self.hidden_side_length, 45, 0, [self.hidden_cube_centre_x - 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2), self.hidden_cube_centre_y + 3 * self.hidden_side_length * self.sides_distortion / math.sqrt(2)])
             if self.hidden_sides_visibility == "on" and self.axis_visibility == "on":
-                self.cube_background.create_line(self.hidden_centre_xcor, self.hidden_centre_ycor, self.hidden_centre_xcor, self.hidden_centre_ycor - 3 * self.hidden_side_length - 10, width = 3, fill = "black", activefill = "white")
-                self.cube_background.create_text(self.hidden_centre_xcor - 10, self.hidden_centre_ycor - 3 * self.hidden_side_length - 10, text = "z", font = "Times 15 bold", fill = "black", activefill = "purple")
-                self.cube_background.create_line(self.hidden_centre_xcor, self.hidden_centre_ycor, self.hidden_centre_xcor + 3 * self.hidden_side_length + 10, self.hidden_centre_ycor, width = 3, fill = "black", activefill = "white")
-                self.cube_background.create_text(self.hidden_centre_xcor + 3 * self.hidden_side_length + 20, self.hidden_centre_ycor - 5, text = "y", font = "Times 15 bold", fill = "black", activefill = "purple")
-                self.cube_background.create_line(self.hidden_centre_xcor, self.hidden_centre_ycor, self.hidden_centre_xcor - (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), self.hidden_centre_ycor + (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), width = 3, fill = "black", activefill = "white")
-                self.cube_background.create_text(self.hidden_centre_xcor - (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), self.hidden_centre_ycor + (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2) + 10, text = "x", font = "Times 15 bold", fill = "black", activefill = "purple")
-                self.cube_background.create_line(self.hidden_centre_xcor, self.hidden_centre_ycor, self.hidden_centre_xcor, self.hidden_centre_ycor, width = 5, fill = "black", capstyle = "round", activefill = "white")
+                self.cube_background.create_line(self.hidden_cube_centre_x, self.hidden_cube_centre_y, self.hidden_cube_centre_x, self.hidden_cube_centre_y - 3 * self.hidden_side_length - 10, width = 3, fill = "black", activefill = "white")
+                self.cube_background.create_text(self.hidden_cube_centre_x - 10, self.hidden_cube_centre_y - 3 * self.hidden_side_length - 10, text = "z", font = "Times 15 bold", fill = "black", activefill = "purple")
+                self.cube_background.create_line(self.hidden_cube_centre_x, self.hidden_cube_centre_y, self.hidden_cube_centre_x + 3 * self.hidden_side_length + 10, self.hidden_cube_centre_y, width = 3, fill = "black", activefill = "white")
+                self.cube_background.create_text(self.hidden_cube_centre_x + 3 * self.hidden_side_length + 20, self.hidden_cube_centre_y - 5, text = "y", font = "Times 15 bold", fill = "black", activefill = "purple")
+                self.cube_background.create_line(self.hidden_cube_centre_x, self.hidden_cube_centre_y, self.hidden_cube_centre_x - (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), self.hidden_cube_centre_y + (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), width = 3, fill = "black", activefill = "white")
+                self.cube_background.create_text(self.hidden_cube_centre_x - (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2), self.hidden_cube_centre_y + (3 * self.hidden_side_length * self.sides_distortion + 10) / math.sqrt(2) + 10, text = "x", font = "Times 15 bold", fill = "black", activefill = "purple")
+                self.cube_background.create_line(self.hidden_cube_centre_x, self.hidden_cube_centre_y, self.hidden_cube_centre_x, self.hidden_cube_centre_y, width = 5, fill = "black", capstyle = "round", activefill = "white")
         elif self.cube_view == "2d":
             gap = 10
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[0], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2, self.cube_background_height / 2 - 3 * self.piece_side_length / 2 - gap])
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[1], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2 - 6 * self.piece_side_length - 2 * gap, self.cube_background_height / 2 + 3 * self.piece_side_length / 2])
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[2], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2 - 3 * self.piece_side_length - gap, self.cube_background_height / 2 + 3 * self.piece_side_length / 2])
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[3], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2, self.cube_background_height / 2 + 3 * self.piece_side_length / 2])
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[4], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2 + 3 * self.piece_side_length + gap, self.cube_background_height / 2 + 3 * self.piece_side_length / 2])
-            self.draw_cube_side(self.cube_background, self.rubiks_cube[5], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.cube_background_width / 2, self.cube_background_height / 2 + 9 * self.piece_side_length / 2 + gap])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[0], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x, self.visible_cube_centre_y - 3 * self.piece_side_length / 2 - gap])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[1], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x - 6 * self.piece_side_length - 2 * gap, self.visible_cube_centre_y + 3 * self.piece_side_length / 2])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[2], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x - 3 * self.piece_side_length - gap, self.visible_cube_centre_y + 3 * self.piece_side_length / 2])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[3], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x, self.visible_cube_centre_y + 3 * self.piece_side_length / 2])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[4], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x + 3 * self.piece_side_length + gap, self.visible_cube_centre_y + 3 * self.piece_side_length / 2])
+            self.draw_cube_side(self.cube_background, self.rubiks_cube[5], self.borders_width, self.piece_side_length, self.piece_side_length, 90, 0, [self.visible_cube_centre_x, self.visible_cube_centre_y + 9 * self.piece_side_length / 2 + gap])
 
 class menu_button():
     def __init__(self, background, button_text, button_font, button_fg, button_bg, button_xcor, button_ycor, button_func):
