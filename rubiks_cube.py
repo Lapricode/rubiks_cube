@@ -800,6 +800,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         if event == None:
             self.buttons_bindings_are_activated = False
             self.moves_bindings_are_activated = False
+            self.make_cube_graphics(self.rubiks_cube)
             if moves_seq != []:
                 self.cube_background.create_text(self.cube_background_width / 2, self.cube_background_height - 20, text = moves_seq[0], font = "Calibri 20 bold", fill = "black")
                 self.cube_background.after(int(1000 * self.moves_speed), lambda: self.make_moves_sequence(self.rubiks_cube, moves_seq[1:], True))
@@ -812,7 +813,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                         self.moves_bindings_are_activated = False
                 elif self.game_state == "auto_solve":
                     self.moves_bindings_are_activated = False
-            self.make_cube_graphics(self.rubiks_cube)
+                self.make_cube_graphics(self.rubiks_cube)
         if self.buttons_bindings_are_activated and self.moves_bindings_are_activated:
             if self.game_state == "moves_scramble":
                 try: self.self_solve_try_yourself_button.destroy()
