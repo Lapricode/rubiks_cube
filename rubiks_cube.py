@@ -391,6 +391,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             except AttributeError: pass
             try: self.self_solve_try_again_button.destroy()
             except AttributeError: pass
+            self.self_solve_try_yourself_button = menu_button(self.down_area_background, "try yourself", "Arial 10 bold", "red", "yellow", self.down_area_background_width / 2, self.down_area_background_height - 15, self.self_solve_cube).button
             self.previous_game_state = self.game_state
             self.game_state = "moves_scramble"
             self.moves_speed = self.scramble_moves_speed
