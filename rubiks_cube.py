@@ -847,7 +847,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                 cube = function_choose(cube)
         if make_changes_to_main_cube:
             self.rubiks_cube = cube
-            if event == None:
+            if event == None and not self.replay_mode_is_activated:
                 self.buttons_bindings_are_activated = False
                 self.moves_bindings_are_activated = False
                 if len(moves_seq) != 0:
