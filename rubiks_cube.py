@@ -134,7 +134,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.solve_cube_menu_label = menu_label(self.menu_background, "Solve cube:", "Times 30 bold", "yellow", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1]).label
         self.solve_moves_speed_label = menu_label(self.menu_background, "time/move (sec):", "Arial 18 bold", "red", "black", solve_cube_menu_cors[0] - 25, solve_cube_menu_cors[1] + first_element_yoffset).label
         self.solve_moves_speed_button = menu_button(self.menu_background, self.solve_moves_speed, "Arial 20 bold", "white", "black", solve_cube_menu_cors[0] + 100, solve_cube_menu_cors[1] + first_element_yoffset, self.change_game_settings_cube_graphics).button
-        self.auto_solve_cube_button = menu_button(self.menu_background, "solve", "Arial 20 bold", "white", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1] + first_element_yoffset + 40, self.auto_solve_cube).button
+        self.auto_solve_cube_button = menu_button(self.menu_background, "solve", "Arial 20 bold", "white", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1] + first_element_yoffset + 40, lambda event: self.auto_solve_cube("choose_method", None, None, event)).button
 
         # bindings
         self.buttons_bindings_are_activated = True
@@ -506,12 +506,12 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             rect_x_offset = -80
             for k in range(6):
                 self.down_area_background.create_rectangle([edge_offset + (rect_side + 2 * centre_x_offset) * k + rect_x_offset, self.down_area_background_height / 2 - rect_side / 2 + centre_y_offset, edge_offset + (rect_side + 2 * centre_x_offset) * k + rect_side + rect_x_offset, self.down_area_background_height / 2 + rect_side / 2 + centre_y_offset], fill = self.cube_colors[k], activefill = "black", width = 5, outline = "black", tags = self.cube_colors[k])
-            self.down_area_background.tag_bind(self.cube_colors[0], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[0], event))
-            self.down_area_background.tag_bind(self.cube_colors[1], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[1], event))
-            self.down_area_background.tag_bind(self.cube_colors[2], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[2], event))
-            self.down_area_background.tag_bind(self.cube_colors[3], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[3], event))
-            self.down_area_background.tag_bind(self.cube_colors[4], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[4], event))
-            self.down_area_background.tag_bind(self.cube_colors[5], '<Button-1>', lambda event: self.change_draw_color(self.cube_colors[5], event))
+            self.down_area_background.tag_bind(self.cube_colors[0], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[0], event))
+            self.down_area_background.tag_bind(self.cube_colors[1], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[1], event))
+            self.down_area_background.tag_bind(self.cube_colors[2], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[2], event))
+            self.down_area_background.tag_bind(self.cube_colors[3], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[3], event))
+            self.down_area_background.tag_bind(self.cube_colors[4], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[4], event))
+            self.down_area_background.tag_bind(self.cube_colors[5], "<Button-1>", lambda event: self.change_draw_color(self.cube_colors[5], event))
             self.clear_cube_draw_button = menu_button(self.down_area_background, "clear cube", "Arial 12 bold", "red", "yellow", self.down_area_background_width - 110, self.down_area_background_height / 2 + centre_y_offset - 15, self.clear_fill_cube_draw).button
             self.fill_cube_draw_button = menu_button(self.down_area_background, "fill cube", "Arial 12 bold", "red", "yellow", self.down_area_background_width - 110, self.down_area_background_height / 2 + centre_y_offset + 15, self.clear_fill_cube_draw).button
             self.change_draw_color(self.chosen_draw_color)
@@ -561,246 +561,315 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             self.down_area_background.create_text(self.down_area_background_width / 2, 20, text = "Self solve ({} moves in total):".format(len(self.self_solve_moves_seq)), font = "Calibri 18 bold", fill = "black")
             self.rubiks_cube = self.copy_cube(self.moves_scrambled_rubiks_cube)
             self.make_cube_graphics(self.rubiks_cube, None)
-    def auto_solve_cube(self, event):
-        if self.buttons_bindings_are_activated and self.game_state != "auto_solve":
-            self.destroy_down_area_buttons()
-            self.moves_bindings_are_activated = False
-            self.replay_mode_is_activated = False
-            if self.cube_is_solved(self.rubiks_cube):
-                if self.game_state != "auto_solve":
-                    self.previous_game_state = self.game_state
+    def auto_solve_cube(self, solve_mode_stage, solve_method_choose, start_color_choose, event):
+        if solve_mode_stage == "choose_method":
+            if self.buttons_bindings_are_activated and self.game_state not in ["self_solve", "auto_solve"]:
+                self.destroy_down_area_buttons()
                 self.down_area_background.delete("all")
-                self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "The cube is already solved!", font = "Arial 20 bold", fill = "brown")
-                self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.cube_is_solved_text, font = "Arial 14 bold", fill = "brown")
-                self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
-                if self.previous_game_state == "moves_scramble" or self.previous_game_state == "self_solve":
-                    row_chars = 25
-                    for index1 in range(len(self.random_scramble_moves_seq) // row_chars + 1):
-                        index2 = [len(self.random_scramble_moves_seq), row_chars * index1 + row_chars][[True, False].index(len(self.random_scramble_moves_seq) // row_chars == 0)]
-                        self.down_area_background.create_text(160, self.down_area_background_height - 45 + 10 * index1, text = self.random_scramble_moves_seq[(row_chars * index1) : index2], font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
-                elif self.previous_game_state == "draw_scramble":
-                    self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
-                self.same_scramble_cube_button = menu_button(self.down_area_background, "same scramble", "Arial 10 bold", "red", "yellow", self.down_area_background_width - 120, self.down_area_background_height - 30, self.same_scramble_cube).button
-            else:
-                self.down_area_background.delete("all")
-                self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Choose the cube side you want to be solved first:", font = "Arial 20 bold", fill = "brown")
-                rect_side = 90
-                edge_offset = 140
-                centre_x_offset = ((self.down_area_background_width - 2 * edge_offset) - 6 * rect_side) / 10
-                centre_y_offset = 20
-                for k in range(6):
-                    self.down_area_background.create_rectangle([edge_offset + (rect_side + 2 * centre_x_offset) * k, self.down_area_background_height / 2 - rect_side / 2 + centre_y_offset, edge_offset + (rect_side + 2 * centre_x_offset) * k + rect_side, self.down_area_background_height / 2 + rect_side / 2 + centre_y_offset], fill = self.cube_colors[k], activefill = "black", width = 5, outline = "black", tags = self.cube_colors[k])
-                self.down_area_background.tag_bind(self.cube_colors[0], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[0][0], event))
-                self.down_area_background.tag_bind(self.cube_colors[1], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[1][0], event))
-                self.down_area_background.tag_bind(self.cube_colors[2], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[2][0], event))
-                self.down_area_background.tag_bind(self.cube_colors[3], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[3][0], event))
-                self.down_area_background.tag_bind(self.cube_colors[4], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[4][0], event))
-                self.down_area_background.tag_bind(self.cube_colors[5], '<Button-1>', lambda event: self.auto_solve_cube_next(self.cube_colors[5][0], event))
-    def auto_solve_cube_next(self, start_color_choose, event):
-        try:
-            if self.buttons_bindings_are_activated and self.game_state != "auto_solve" and not self.cube_is_solved(self.rubiks_cube):
-                self.previous_game_state = self.game_state
-                self.game_state = "auto_solve"
-                self.buttons_bindings_are_activated = False
                 self.moves_bindings_are_activated = False
-                self.moves_speed = self.solve_moves_speed
-                rubiks_cube2 = self.copy_cube(self.rubiks_cube)
-                initial_solved_color = start_color_choose
-                edges = [["101", "001"], ["112", "210"], ["121", "521"], ["110", "412"], \
-                        ["012", "401"], ["201", "010"], ["510", "221"], ["421", "512"], \
-                        ["301", "021"], ["310", "212"], ["321", "501"], ["312", "410"]]  # in order: down edges, middle edges, up edges
-                corners = [["122", "220", "520"], ["120", "522", "422"], ["100", "402", "002"], ["102", "000", "200"], \
-                        ["320", "222", "500"], ["322", "502", "420"], ["302", "400", "022"], ["300", "020", "202"]]  # in order: down corners, up corners
-                final_solved_color = ["b", "r", "y", "g", "o", "w"][(["b", "r", "y", "g", "o", "w"].index(initial_solved_color) + 3) % 6]
-                middle_centres = [["r", "w", "o", "y"], ["g", "w", "b", "y"], ["b", "o", "g", "r"]][["b", "r", "y", "g", "o", "w"].index(initial_solved_color) % 3]
-                if initial_solved_color in ["g", "o", "w"]:
-                    middle_centres.reverse()
-                
-                # putting the proper centre facing down
-                solve_moves = []
-                solve_moves2 = []
-                centres = [side[1][1] for side in rubiks_cube2]
-                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["M'"], [], ["S'"], ["M", "M"], ["S"], ["M"]][centres.index(initial_solved_color)], False)
-                solve_moves.append([["M'"], [], ["S'"], ["M", "M"], ["S"], ["M"]][centres.index(initial_solved_color)])
-                
-                # making the down cross
-                cross_pieces_solved = []
-                edges_examined = [edges[k] for k in range(len(edges)-1, -1, -1)]
-                for counter in range(4):
-                    for edge in edges_examined:
-                        edge_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])], \
-                                    rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])]]
-                        if initial_solved_color in edge_colors:
-                            not_cross_color = edge_colors[1 - edge_colors.index(initial_solved_color)]
-                            if not_cross_color not in cross_pieces_solved:
-                                edge_layer = edges.index(edge) // 4
-                                if edge_layer == 0 and edge_colors[0] == initial_solved_color and edge_colors[1] == rubiks_cube2[int(edge[1][0])][1][1]:
-                                    # edge already in the correct position
-                                    cross_pieces_solved.append(not_cross_color)
-                                else:
-                                    # put edge in front up middle position
-                                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y" + (abs([0, 2, 2][edge_layer] - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F", "F"], ["F'", "U'", "F", "U"], []][edge_layer], False)
-                                    solve_moves.append([[], ["y" + (abs([0, 2, 2][edge_layer] - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F", "F"], ["F'", "U'", "F", "U"], []][edge_layer])
-                                    # put edge in the correct position
-                                    offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(not_cross_color)
-                                    edge_orientation = edge_colors.index(initial_solved_color)
-                                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["F'", "F'"], ["U", "L", "L"], ["U", "U", "B", "B"], ["U'", "R", "R"]], \
-                                                                                        [["U'", "M'", "U", "M"], ["F'", "L", "F"], ["U", "M", "U", "M'"], ["F", "R'", "F'"]]][edge_orientation][offset], False)
-                                    solve_moves.append([[["F'", "F'"], ["U", "L", "L"], ["U", "U", "B", "B"], ["U'", "R", "R"]], \
-                                                [["U'", "M'", "U", "M"], ["F'", "L", "F"], ["U", "M", "U", "M'"], ["F", "R'", "F'"]]][edge_orientation][offset])
-                                    cross_pieces_solved.append(not_cross_color)
+                self.replay_mode_is_activated = False
+                if self.cube_is_solved(self.rubiks_cube):
+                    if self.game_state != "auto_solve":
+                        self.previous_game_state = self.game_state
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "The cube is already solved!", font = "Arial 20 bold", fill = "brown")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.cube_is_solved_text, font = "Arial 14 bold", fill = "brown")
+                    self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
+                    if self.previous_game_state == "moves_scramble" or self.previous_game_state == "self_solve":
+                        row_chars = 25
+                        for index1 in range(len(self.random_scramble_moves_seq) // row_chars + 1):
+                            index2 = [len(self.random_scramble_moves_seq), row_chars * index1 + row_chars][[True, False].index(len(self.random_scramble_moves_seq) // row_chars == 0)]
+                            self.down_area_background.create_text(160, self.down_area_background_height - 45 + 10 * index1, text = self.random_scramble_moves_seq[(row_chars * index1) : index2], font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
+                    elif self.previous_game_state == "draw_scramble":
+                        self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
+                    self.same_scramble_cube_button = menu_button(self.down_area_background, "same scramble", "Arial 10 bold", "red", "yellow", self.down_area_background_width - 120, self.down_area_background_height - 30, self.same_scramble_cube).button
+                else:
+                    self.previous_game_state = self.game_state
+                    self.game_state = "auto_solve"
+                    self.make_cube_graphics(self.rubiks_cube, None)
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Select the solving method you want to be used:", font = "Arial 20 bold", fill = "brown")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 - 10, text = "Beginner's method (simple and slow, many moves needed)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "Beginner")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 25, text = "CFOP method (advanced and fast, used in speedcubing)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "CFOP")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 60, text = "Kociemba's algorithm (the fastest way, 20 moves in average)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "Kociemba")
+                    self.down_area_background.tag_bind("Beginner", "<Button-1>", lambda event: self.auto_solve_cube("choose_color", "Beginner", None, event))
+                    self.down_area_background.tag_bind("CFOP", "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", "CFOP", None, event))
+                    self.down_area_background.tag_bind("Kociemba", "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", "Kociemba", None, event))
+        elif solve_mode_stage == "choose_color":
+            self.destroy_down_area_buttons()
+            self.down_area_background.delete("all")
+            rect_side = 90
+            edge_offset = 140
+            centre_x_offset = ((self.down_area_background_width - 2 * edge_offset) - 6 * rect_side) / 10
+            centre_y_offset = 20
+            self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Choose the cube side you want to be solved first:", font = "Arial 20 bold", fill = "brown")
+            for k in range(6):
+                self.down_area_background.create_rectangle([edge_offset + (rect_side + 2 * centre_x_offset) * k, self.down_area_background_height / 2 - rect_side / 2 + centre_y_offset, edge_offset + (rect_side + 2 * centre_x_offset) * k + rect_side, self.down_area_background_height / 2 + rect_side / 2 + centre_y_offset], fill = self.cube_colors[k], activefill = "black", width = 5, outline = "black", tags = self.cube_colors[k])
+            self.down_area_background.tag_bind(self.cube_colors[0], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[0][0], event))
+            self.down_area_background.tag_bind(self.cube_colors[1], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[1][0], event))
+            self.down_area_background.tag_bind(self.cube_colors[2], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[2][0], event))
+            self.down_area_background.tag_bind(self.cube_colors[3], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[3][0], event))
+            self.down_area_background.tag_bind(self.cube_colors[4], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[4][0], event))
+            self.down_area_background.tag_bind(self.cube_colors[5], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[5][0], event))
+        elif solve_mode_stage == "solve_cube":
+            try:
+                if self.buttons_bindings_are_activated:
+                    self.buttons_bindings_are_activated = False
+                    self.moves_bindings_are_activated = False
+                    self.moves_speed = self.solve_moves_speed
+                    if solve_method_choose == "Beginner":
+                        rubiks_cube2 = self.copy_cube(self.rubiks_cube)
+                        initial_solved_color = start_color_choose
+                        edges = [["101", "001"], ["112", "210"], ["121", "521"], ["110", "412"], \
+                                ["012", "401"], ["201", "010"], ["510", "221"], ["421", "512"], \
+                                ["301", "021"], ["310", "212"], ["321", "501"], ["312", "410"]]  # in order: down edges, middle edges, up edges
+                        corners = [["122", "220", "520"], ["120", "522", "422"], ["100", "402", "002"], ["102", "000", "200"], \
+                                ["320", "222", "500"], ["322", "502", "420"], ["302", "400", "022"], ["300", "020", "202"]]  # in order: down corners, up corners
+                        final_solved_color = ["b", "r", "y", "g", "o", "w"][(["b", "r", "y", "g", "o", "w"].index(initial_solved_color) + 3) % 6]
+                        middle_centres = [["r", "w", "o", "y"], ["g", "w", "b", "y"], ["b", "o", "g", "r"]][["b", "r", "y", "g", "o", "w"].index(initial_solved_color) % 3]
+                        if initial_solved_color in ["g", "o", "w"]:
+                            middle_centres.reverse()
+                        # putting the proper centre facing down
+                        solve_moves = []
+                        solve_moves2 = []
+                        centres = [side[1][1] for side in rubiks_cube2]
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["x"], [], ["z'"], ["x", "x"], ["z"], ["x'"]][centres.index(initial_solved_color)], False)
+                        solve_moves.append([["x"], [], ["z'"], ["x", "x"], ["z"], ["x'"]][centres.index(initial_solved_color)])
+                        # making the down cross
+                        cross_pieces_solved = []
+                        edges_examined = [edges[k] for k in range(len(edges)-1, -1, -1)]
+                        for counter in range(4):
+                            for edge in edges_examined:
+                                edge_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])], \
+                                            rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])]]
+                                if initial_solved_color in edge_colors:
+                                    not_cross_color = edge_colors[1 - edge_colors.index(initial_solved_color)]
+                                    if not_cross_color not in cross_pieces_solved:
+                                        edge_layer = edges.index(edge) // 4
+                                        if edge_layer == 0 and edge_colors[0] == initial_solved_color and edge_colors[1] == rubiks_cube2[int(edge[1][0])][1][1]:
+                                            # edge already in the correct position
+                                            cross_pieces_solved.append(not_cross_color)
+                                        else:
+                                            # put edge in front up middle position
+                                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y" + (abs([0, 2, 2][edge_layer] - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F", "F"], ["F'", "U'", "F", "U"], []][edge_layer], False)
+                                            solve_moves.append([[], ["y" + (abs([0, 2, 2][edge_layer] - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F", "F"], ["F'", "U'", "F", "U"], []][edge_layer])
+                                            # put edge in the correct position
+                                            offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(not_cross_color)
+                                            edge_orientation = edge_colors.index(initial_solved_color)
+                                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["F'", "F'"], ["U", "L", "L"], ["U", "U", "B", "B"], ["U'", "R", "R"]], \
+                                                                                                [["U'", "M'", "U", "M"], ["F'", "L", "F"], ["U", "M", "U", "M'"], ["F", "R'", "F'"]]][edge_orientation][offset], False)
+                                            solve_moves.append([[["F'", "F'"], ["U", "L", "L"], ["U", "U", "B", "B"], ["U'", "R", "R"]], \
+                                                        [["U'", "M'", "U", "M"], ["F'", "L", "F"], ["U", "M", "U", "M'"], ["F", "R'", "F'"]]][edge_orientation][offset])
+                                            cross_pieces_solved.append(not_cross_color)
+                                            break
+                        solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
+                        # solving the down side corners
+                        solve_moves = []
+                        down_corners_solved = []
+                        corners_examined = [corners[k] for k in range(len(corners)-1, -1, -1)]
+                        for counter in range(4):
+                            for corner in corners_examined:
+                                corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
+                                                rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
+                                                rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
+                                if initial_solved_color in corner_colors:
+                                    other_corner_colors = [corner_colors[corner_colors.index(initial_solved_color) - 1], corner_colors[corner_colors.index(initial_solved_color) - 2]]
+                                    if other_corner_colors not in down_corners_solved and [other_corner_colors[1], other_corner_colors[0]] not in down_corners_solved:
+                                        corner_layer = corners.index(corner) // 4
+                                        if corner_layer == 0 and corner_colors[0] == initial_solved_color and corner_colors[1] == rubiks_cube2[int(corner[1][0])][1][1] and corner_colors[2] == rubiks_cube2[int(corner[2][0])][1][1]:
+                                            # corner already in the correct position
+                                            down_corners_solved.append(other_corner_colors)
+                                        else:
+                                            # put corner in front up right position
+                                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["y"], ["y", "y"]][corner_layer], [["y", "y"], [], ["y"], ["y'"]][int(int(corner[0][1]) / 2 + 2 * corner_layer)], [["y'"], []][corner_layer]][int((int(corner[0][1]) + int(corner[0][2])) / 2)] + [["R", "U", "R'", "U'"], []][corner_layer], False)
+                                            solve_moves.append([[["y"], ["y", "y"]][corner_layer], [["y", "y"], [], ["y"], ["y'"]][int(int(corner[0][1]) / 2 + 2 * corner_layer)], [["y'"], []][corner_layer]][int((int(corner[0][1]) + int(corner[0][2])) / 2)] + [["R", "U", "R'", "U'"], []][corner_layer])
+                                            # put corner in the correct position
+                                            offset = [2, [1, 3][[True, False].index(rubiks_cube2[5][1][1] in other_corner_colors)], 0][[rubiks_cube2[5][1][1] in other_corner_colors, rubiks_cube2[4][1][1] in other_corner_colors].count(True)]
+                                            corner_orientation = [rubiks_cube2[3][2][2] == initial_solved_color, rubiks_cube2[5][0][2] == initial_solved_color, rubiks_cube2[4][2][0] == initial_solved_color].index(True)
+                                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["R", "U'", "U'", "R'", "U'", "R", "U", "R'"], ["U", "L'", "U", "L", "U", "U", "L'", "U'", "L"], ["L", "U", "L'", "U", "L", "U'", "L'"], ["U'", "R'", "U", "U", "R", "U", "R'", "U'", "R"]], \
+                                                                                                [["U", "R", "U'", "R'"], ["U", "L'", "U'", "L"], ["L", "U", "U", "L'"], ["B", "U'", "B'"]], \
+                                                                                                [["R", "U", "R'"], ["L'", "U", "L"], ["U", "U", "L", "U", "L'"], ["U'", "U'", "R'", "U", "R"]]][corner_orientation][offset], False)
+                                            solve_moves.append([[["R", "U'", "U'", "R'", "U'", "R", "U", "R'"], ["U", "L'", "U", "L", "U", "U", "L'", "U'", "L"], ["L", "U", "L'", "U", "L", "U'", "L'"], ["U'", "R'", "U", "U", "R", "U", "R'", "U'", "R"]], \
+                                                                [["U", "R", "U'", "R'"], ["U", "L'", "U'", "L"], ["L", "U", "U", "L'"], ["B", "U'", "B'"]], \
+                                                                [["R", "U", "R'"], ["L'", "U", "L"], ["U", "U", "L", "U", "L'"], ["U'", "U'", "R'", "U", "R"]]][corner_orientation][offset])
+                                            down_corners_solved.append(other_corner_colors)
+                                            break
+                        solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
+                        # solving the middle edges
+                        solve_moves = []
+                        middle_edges_solved = []
+                        edges_examined = [edges[k] for k in range(len(edges)-1, 3, -1)]
+                        for counter in range(4):
+                            for edge in edges_examined:
+                                edge_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])], \
+                                            rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])]]
+                                if final_solved_color not in edge_colors and edge_colors not in middle_edges_solved and [edge_colors[1], edge_colors[0]] not in middle_edges_solved:
+                                    edge_layer = edges[4:].index(edge) // 4
+                                    if edge_layer == 0 and edge_colors[0] == rubiks_cube2[int(edge[0][0])][1][1] and edge_colors[1] == rubiks_cube2[int(edge[1][0])][1][1]:
+                                        middle_edges_solved.append(edge_colors)
+                                    else:
+                                        # put edge in front up middle position
+                                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y" + ((2 - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F'", "U", "F", "U", "R", "U'", "R'", "U'"], []][edge_layer], False)
+                                        solve_moves.append([[], ["y" + ((2 - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F'", "U", "F", "U", "R", "U'", "R'", "U'"], []][edge_layer])
+                                        # put edge in the correct position
+                                        offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(edge_colors[1])
+                                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y'", "U"], ["y", "y", "U", "U"], ["y", "U'"]][offset], False)
+                                        solve_moves.append([[], ["y'", "U"], ["y", "y", "U", "U"], ["y", "U'"]][offset])
+                                        edge_orientation = [True, False].index(edge_colors[0] == rubiks_cube2[4][1][1])
+                                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "R", "U'", "R'", "U'", "F'", "U", "F"], ["U'", "L'", "U", "L", "U", "F", "U'", "F'"]][edge_orientation], False)
+                                        solve_moves.append([["U", "R", "U'", "R'", "U'", "F'", "U", "F"], ["U'", "L'", "U", "L", "U", "F", "U'", "F'"]][edge_orientation])
+                                        middle_edges_solved.append(edge_colors)
+                                        break
+                        solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
+                        # making the up cross and orienting it
+                        solve_moves = []
+                        edges_examined = [edge for edge in edges[8:]]
+                        up_edges_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])] for edge in edges_examined]
+                        up_case = int(up_edges_colors.count(final_solved_color) // 2)
+                        angle_line_case = [0, 1][[True, False].index((up_edges_colors[0] == final_solved_color) ^ (up_edges_colors[2] == final_solved_color))]
+                        check_up_left_back_edge_color = [rubiks_cube2[3][0][1], rubiks_cube2[3][1][0]]
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["F", "R", "U", "R'", "U'", "S", "R", "U", "R'", "U'", "S'", "F'"], \
+                                                                            [[["U", "U"], [["U'"], ["U"]][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)], []][check_up_left_back_edge_color.count(final_solved_color)] + ["F", "U", "R", "U'", "R'", "F'"], \
+                                                                            [["U"], []][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)] + ["F", "R", "U", "R'", "U'", "F'"]][angle_line_case], []][up_case], False)
+                        solve_moves.append([["F", "R", "U", "R'", "U'", "S", "R", "U", "R'", "U'", "S'", "F'"], \
+                                            [[["U", "U"], [["U'"], ["U"]][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)], []][check_up_left_back_edge_color.count(final_solved_color)] + ["F", "U", "R", "U'", "R'", "F'"], \
+                                            [["U"], []][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)] + ["F", "R", "U", "R'", "U'", "F'"]][angle_line_case], []][up_case])
+                        not_cross_colors = [rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])] for edge in edges_examined]
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "U"], ["U'"], [], ["U"]][not_cross_colors.index(rubiks_cube2[5][1][1])], False)
+                        solve_moves.append([["U", "U"], ["U'"], [], ["U"]][not_cross_colors.index(rubiks_cube2[5][1][1])])
+                        right_edge_offset = abs(middle_centres.index(rubiks_cube2[4][1][1]) - middle_centres.index(rubiks_cube2[4][1][0]))
+                        left_edge_offset = abs(middle_centres.index(rubiks_cube2[2][1][1]) - middle_centres.index(rubiks_cube2[2][1][2]))
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[[], ["y'", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"]][left_edge_offset % 2], \
+                                                                            [["y", "y", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"], ["R", "R", "U'", "R'", "U'", "R", "U", "R", "U", "R", "U'", "R"]][left_edge_offset // 2], \
+                                                                            [["R'", "U", "R'", "U'", "R'", "U'", "R'", "U", "R", "U", "R", "R"], ["R", "U", "R'", "U'", "R'", "F", "R", "R", "U'", "R'", "U'", "R", "U", "R'", "F'"]][[0, 0, 1, 0][left_edge_offset]]][[0, 1, 2, 1][right_edge_offset]], False)
+                        solve_moves.append([[[], ["y'", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"]][left_edge_offset % 2], \
+                                            [["y", "y", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"], ["R", "R", "U'", "R'", "U'", "R", "U", "R", "U", "R", "U'", "R"]][left_edge_offset // 2], \
+                                            [["R'", "U", "R'", "U'", "R'", "U'", "R'", "U", "R", "U", "R", "R"], ["R", "U", "R'", "U'", "R'", "F", "R", "R", "U'", "R'", "U'", "R", "U", "R'", "F'"], []][[0, 0, 1, 0][left_edge_offset]]][[0, 1, 2, 1][right_edge_offset]])
+                        solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
+                        # solving the up side corners
+                        solve_moves = []
+                        up_corners_in_right_position = []
+                        corners_examined = corners[4:]
+                        for corner in corners_examined:
+                            corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
+                                            rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
+                                            rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
+                            corner_centres_colors = [rubiks_cube2[int(corner[0][0])][1][1], rubiks_cube2[int(corner[1][0])][1][1], rubiks_cube2[int(corner[2][0])][1][1]]
+                            if (corner_colors[0] in corner_centres_colors) and (corner_colors[1] in corner_centres_colors) and (corner_colors[2] in corner_centres_colors):
+                                up_corners_in_right_position.append(corner)
+                        if len(up_corners_in_right_position) == 0:
+                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, ["U", "R", "U'", "L'", "U", "R'", "U'", "L"], False)
+                            solve_moves.append(["U", "R", "U'", "L'", "U", "R'", "U'", "L"])
+                            for corner in corners_examined:
+                                corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
+                                                rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
+                                                rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
+                                corner_centres_colors = [rubiks_cube2[int(corner[0][0])][1][1], rubiks_cube2[int(corner[1][0])][1][1], rubiks_cube2[int(corner[2][0])][1][1]]
+                                if (corner_colors[0] in corner_centres_colors) and (corner_colors[1] in corner_centres_colors) and (corner_colors[2] in corner_centres_colors):
+                                    corner_in_right_position = corner
                                     break
-                solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
-                
-                # solving the down side corners
-                solve_moves = []
-                down_corners_solved = []
-                corners_examined = [corners[k] for k in range(len(corners)-1, -1, -1)]
-                for counter in range(4):
-                    for corner in corners_examined:
-                        corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
-                                        rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
-                                        rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
-                        if initial_solved_color in corner_colors:
-                            other_corner_colors = [corner_colors[corner_colors.index(initial_solved_color) - 1], corner_colors[corner_colors.index(initial_solved_color) - 2]]
-                            if other_corner_colors not in down_corners_solved and [other_corner_colors[1], other_corner_colors[0]] not in down_corners_solved:
-                                corner_layer = corners.index(corner) // 4
-                                if corner_layer == 0 and corner_colors[0] == initial_solved_color and corner_colors[1] == rubiks_cube2[int(corner[1][0])][1][1] and corner_colors[2] == rubiks_cube2[int(corner[2][0])][1][1]:
-                                    # corner already in the correct position
-                                    down_corners_solved.append(other_corner_colors)
+                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])], False)
+                            solve_moves.append([[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])])
+                        elif len(up_corners_in_right_position) == 1:
+                            corner_in_right_position = up_corners_in_right_position[0]
+                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])], False)
+                            solve_moves.append([[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])])
+                        right_back_corner_centres_colors = [rubiks_cube2[3][1][1], rubiks_cube2[4][1][1], rubiks_cube2[0][1][1]]
+                        if len(up_corners_in_right_position) != 4:
+                            position_index = [True, False].index((rubiks_cube2[3][2][0] in right_back_corner_centres_colors) and (rubiks_cube2[5][0][0] in right_back_corner_centres_colors) and (rubiks_cube2[2][2][2] in right_back_corner_centres_colors))
+                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "R", "U'", "L'", "U", "R'", "U'", "L"], ["L'", "U", "R", "U'", "L", "U", "R'", "U'"]][position_index], False)
+                            solve_moves.append([["U", "R", "U'", "L'", "U", "R'", "U'", "L"], ["L'", "U", "R", "U'", "L", "U", "R'", "U'"]][position_index])
+                        for k in range(4):
+                            orientation_index = [rubiks_cube2[3][2][2], rubiks_cube2[5][0][2], rubiks_cube2[4][2][0]].index(final_solved_color)
+                            rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], 4 * ["R'", "D'", "R", "D"], 2 * ["R'", "D'", "R", "D"]][orientation_index] + ["U'"], False)
+                            solve_moves.append([[], 4 * ["R'", "D'", "R", "D"], 2 * ["R'", "D'", "R", "D"]][orientation_index] + ["U'"])
+                        up_side_offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(rubiks_cube2[5][0][1])
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["U"], ["U", "U"], ["U'"]][up_side_offset], False)
+                        solve_moves.append([[], ["U"], ["U", "U"], ["U'"]][up_side_offset])
+                        solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
+                        # write beginner solution
+                        if self.cube_is_solved(rubiks_cube2):
+                            self.down_area_background.delete("all")
+                            solving_notes = ["Solving {} cross".format(self.cube_colors[["b", "y", "o", "w", "r", "g"].index(initial_solved_color)]), \
+                                            "Solving down corners", "Solving middle edges", \
+                                            "Solving {} cross".format(self.cube_colors[["b", "y", "o", "w", "r", "g"].index(final_solved_color)]), \
+                                            "Solving up corners"]
+                            row_chars = 50
+                            line_offset = 0
+                            for k in range(len(solve_moves2)):
+                                solve_moves2[k] = self.improve_moves_sequence(solve_moves2[k])
+                                self.down_area_background.create_text(10, 40 + 15 * (k + line_offset), text = solving_notes[k] + " ({} moves):".format(len(solve_moves2[k])), font = "Arial 10 bold", fill = "purple", anchor = tk.NW)
+                                for index1 in range(len(solve_moves2[k]) // row_chars + 1):
+                                    index2 = [len(solve_moves2[k]), row_chars * index1 + row_chars][[True, False].index(len(solve_moves2[k]) // row_chars == 0)]
+                                    self.down_area_background.create_text(250, 40 + 15 * (k + index1 + line_offset), text = solve_moves2[k][(row_chars * index1) : index2], font = "Arial 10 italic bold", fill = "darkblue", anchor = tk.NW)
+                                if len(solve_moves2[k]) // row_chars != 0:
+                                    line_offset += 1
+                            self.auto_solve_moves_seq = solve_moves2[0] + solve_moves2[1] + solve_moves2[2] + solve_moves2[3] + solve_moves2[4]
+                        else:
+                            raise
+                    elif solve_method_choose in ["CFOP", "Kociemba"]:
+                        solve_moves = []
+                        centres = [side[1][1] for side in self.rubiks_cube]
+                        rubiks_cube2 = self.make_moves_sequence(self.rubiks_cube, [["x"], [], ["z'"], ["x", "x"], ["z"], ["x'"]][centres.index("w")], False)
+                        solve_moves.append(["x", "", "z'", "x2", "z", "x'"][centres.index("w")])
+                        centres = [side[1][1] for side in rubiks_cube2]
+                        rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["y'"], [], [], [], ["y", "y"], ["y"]][centres.index("b")], False)
+                        solve_moves.append(["y'", "", "", "", "y2", "y"][centres.index("b")])
+                        cube_colors = self.get_colors_rubik_solver_library(rubiks_cube2)
+                        solve_moves = solve_moves + utils.solve(cube_colors, solve_method_choose)
+                        solve_moves = [[str(move), str(move).lower()][[True, False][str(move)[0] not in ["X", "Y", "Z"]]] for move in solve_moves if move != ""]
+                        solve_moves = self.improve_moves_sequence(solve_moves)
+                        if solve_method_choose == "CFOP":
+                            rubiks_cube2 = self.copy_cube(self.rubiks_cube)
+                            solve_moves2 = [[], [], [], []]
+                            CFOP_stage = 0
+                            for move in solve_moves:
+                                # white Cross check
+                                white_Cross_pieces_solved = [rubiks_cube2[1][1][1] == "w", rubiks_cube2[1][2][1] == "w", rubiks_cube2[1][1][0] == "w", rubiks_cube2[1][0][1] == "w", rubiks_cube2[1][1][2] == "w", \
+                                                            rubiks_cube2[5][1][1] == rubiks_cube2[5][2][1], rubiks_cube2[2][1][1] == rubiks_cube2[2][1][0], rubiks_cube2[0][1][1] == rubiks_cube2[0][0][1], rubiks_cube2[4][1][1] == rubiks_cube2[4][1][2]]
+                                solved_Cross = white_Cross_pieces_solved.count(True) == len(white_Cross_pieces_solved)
+                                # F2L check
+                                F2L_pieces_solved = [[rubiks_cube2[5][1][0], rubiks_cube2[5][2][0], rubiks_cube2[5][1][2], rubiks_cube2[5][2][2]].count(rubiks_cube2[5][1][1]) == 4, \
+                                                    [rubiks_cube2[4][2][1], rubiks_cube2[4][2][2], rubiks_cube2[4][0][1], rubiks_cube2[4][0][2]].count(rubiks_cube2[4][1][1]) == 4, \
+                                                    [rubiks_cube2[0][1][2], rubiks_cube2[0][0][2], rubiks_cube2[0][1][0], rubiks_cube2[0][0][0]].count(rubiks_cube2[0][1][1]) == 4, \
+                                                    [rubiks_cube2[2][0][1], rubiks_cube2[2][0][0], rubiks_cube2[2][2][1], rubiks_cube2[2][2][0]].count(rubiks_cube2[2][1][1]) == 4]
+                                solved_F2L = solved_Cross and F2L_pieces_solved.count(True) == len(F2L_pieces_solved)
+                                # OLL check
+                                OLL_pieces_solved = [rubiks_cube2[3][i][j] for j in range(3) for i in range(3)]
+                                solved_OLL = solved_F2L and OLL_pieces_solved.count("y") == len(OLL_pieces_solved)
+                                CFOP_stages_check = [solved_Cross, solved_F2L, solved_OLL]
+                                if CFOP_stages_check.count(True) > CFOP_stage:
+                                    CFOP_stage = CFOP_stages_check.count(True)
+                                    solve_moves2[CFOP_stage].append(move)
                                 else:
-                                    # put corner in front up right position
-                                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["y"], ["y", "y"]][corner_layer], [["y", "y"], [], ["y"], ["y'"]][int(int(corner[0][1]) / 2 + 2 * corner_layer)], [["y'"], []][corner_layer]][int((int(corner[0][1]) + int(corner[0][2])) / 2)] + [["R", "U", "R'", "U'"], []][corner_layer], False)
-                                    solve_moves.append([[["y"], ["y", "y"]][corner_layer], [["y", "y"], [], ["y"], ["y'"]][int(int(corner[0][1]) / 2 + 2 * corner_layer)], [["y'"], []][corner_layer]][int((int(corner[0][1]) + int(corner[0][2])) / 2)] + [["R", "U", "R'", "U'"], []][corner_layer])
-                                    # put corner in the correct position
-                                    offset = [2, [1, 3][[True, False].index(rubiks_cube2[5][1][1] in other_corner_colors)], 0][[rubiks_cube2[5][1][1] in other_corner_colors, rubiks_cube2[4][1][1] in other_corner_colors].count(True)]
-                                    corner_orientation = [rubiks_cube2[3][2][2] == initial_solved_color, rubiks_cube2[5][0][2] == initial_solved_color, rubiks_cube2[4][2][0] == initial_solved_color].index(True)
-                                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[["R", "U'", "U'", "R'", "U'", "R", "U", "R'"], ["U", "L'", "U", "L", "U", "U", "L'", "U'", "L"], ["L", "U", "L'", "U", "L", "U'", "L'"], ["U'", "R'", "U", "U", "R", "U", "R'", "U'", "R"]], \
-                                                                                        [["U", "R", "U'", "R'"], ["U", "L'", "U'", "L"], ["L", "U", "U", "L'"], ["B", "U'", "B'"]], \
-                                                                                        [["R", "U", "R'"], ["L'", "U", "L"], ["U", "U", "L", "U", "L'"], ["U'", "U'", "R'", "U", "R"]]][corner_orientation][offset], False)
-                                    solve_moves.append([[["R", "U'", "U'", "R'", "U'", "R", "U", "R'"], ["U", "L'", "U", "L", "U", "U", "L'", "U'", "L"], ["L", "U", "L'", "U", "L", "U'", "L'"], ["U'", "R'", "U", "U", "R", "U", "R'", "U'", "R"]], \
-                                                        [["U", "R", "U'", "R'"], ["U", "L'", "U'", "L"], ["L", "U", "U", "L'"], ["B", "U'", "B'"]], \
-                                                        [["R", "U", "R'"], ["L'", "U", "L"], ["U", "U", "L", "U", "L'"], ["U'", "U'", "R'", "U", "R"]]][corner_orientation][offset])
-                                    down_corners_solved.append(other_corner_colors)
-                                    break
-                solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
-                
-                # solving the middle edges
-                solve_moves = []
-                middle_edges_solved = []
-                edges_examined = [edges[k] for k in range(len(edges)-1, 3, -1)]
-                for counter in range(4):
-                    for edge in edges_examined:
-                        edge_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])], \
-                                    rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])]]
-                        if final_solved_color not in edge_colors and edge_colors not in middle_edges_solved and [edge_colors[1], edge_colors[0]] not in middle_edges_solved:
-                            edge_layer = edges[4:].index(edge) // 4
-                            if edge_layer == 0 and edge_colors[0] == rubiks_cube2[int(edge[0][0])][1][1] and edge_colors[1] == rubiks_cube2[int(edge[1][0])][1][1]:
-                                middle_edges_solved.append(edge_colors)
-                            else:
-                                # put edge in front up middle position
-                                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y" + ((2 - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F'", "U", "F", "U", "R", "U'", "R'", "U'"], []][edge_layer], False)
-                                solve_moves.append([[], ["y" + ((2 - int(edge[0][2])) // 2) * "'"], ["y", "y"]][2 - int(edge[0][1])] + [["F'", "U", "F", "U", "R", "U'", "R'", "U'"], []][edge_layer])
-                                # put edge in the correct position
-                                offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(edge_colors[1])
-                                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y'", "U"], ["y", "y", "U", "U"], ["y", "U'"]][offset], False)
-                                solve_moves.append([[], ["y'", "U"], ["y", "y", "U", "U"], ["y", "U'"]][offset])
-                                edge_orientation = [True, False].index(edge_colors[0] == rubiks_cube2[4][1][1])
-                                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "R", "U'", "R'", "U'", "F'", "U", "F"], ["U'", "L'", "U", "L", "U", "F", "U'", "F'"]][edge_orientation], False)
-                                solve_moves.append([["U", "R", "U'", "R'", "U'", "F'", "U", "F"], ["U'", "L'", "U", "L", "U", "F", "U'", "F'"]][edge_orientation])
-                                middle_edges_solved.append(edge_colors)
-                                break
-                solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
-                
-                # making the up cross and orienting it
-                solve_moves = []
-                edges_examined = [edge for edge in edges[8:]]
-                up_edges_colors = [rubiks_cube2[int(edge[0][0])][int(edge[0][1])][int(edge[0][2])] for edge in edges_examined]
-                up_case = int(up_edges_colors.count(final_solved_color) // 2)
-                angle_line_case = [0, 1][[True, False].index((up_edges_colors[0] == final_solved_color) ^ (up_edges_colors[2] == final_solved_color))]
-                check_up_left_back_edge_color = [rubiks_cube2[3][0][1], rubiks_cube2[3][1][0]]
-                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["F", "R", "U", "R'", "U'", "S", "R", "U", "R'", "U'", "S'", "F'"], \
-                                                                    [[["U", "U"], [["U'"], ["U"]][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)], []][check_up_left_back_edge_color.count(final_solved_color)] + ["F", "U", "R", "U'", "R'", "F'"], \
-                                                                    [["U"], []][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)] + ["F", "R", "U", "R'", "U'", "F'"]][angle_line_case], []][up_case], False)
-                solve_moves.append([["F", "R", "U", "R'", "U'", "S", "R", "U", "R'", "U'", "S'", "F'"], \
-                                    [[["U", "U"], [["U'"], ["U"]][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)], []][check_up_left_back_edge_color.count(final_solved_color)] + ["F", "U", "R", "U'", "R'", "F'"], \
-                                    [["U"], []][[True, False].index(check_up_left_back_edge_color[0] == final_solved_color)] + ["F", "R", "U", "R'", "U'", "F'"]][angle_line_case], []][up_case])
-                not_cross_colors = [rubiks_cube2[int(edge[1][0])][int(edge[1][1])][int(edge[1][2])] for edge in edges_examined]
-                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "U"], ["U'"], [], ["U"]][not_cross_colors.index(rubiks_cube2[5][1][1])], False)
-                solve_moves.append([["U", "U"], ["U'"], [], ["U"]][not_cross_colors.index(rubiks_cube2[5][1][1])])
-                right_edge_offset = abs(middle_centres.index(rubiks_cube2[4][1][1]) - middle_centres.index(rubiks_cube2[4][1][0]))
-                left_edge_offset = abs(middle_centres.index(rubiks_cube2[2][1][1]) - middle_centres.index(rubiks_cube2[2][1][2]))
-                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[[], ["y'", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"]][left_edge_offset % 2], \
-                                                                    [["y", "y", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"], ["R", "R", "U'", "R'", "U'", "R", "U", "R", "U", "R", "U'", "R"]][left_edge_offset // 2], \
-                                                                    [["R'", "U", "R'", "U'", "R'", "U'", "R'", "U", "R", "U", "R", "R"], ["R", "U", "R'", "U'", "R'", "F", "R", "R", "U'", "R'", "U'", "R", "U", "R'", "F'"]][[0, 0, 1, 0][left_edge_offset]]][[0, 1, 2, 1][right_edge_offset]], False)
-                solve_moves.append([[[], ["y'", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"]][left_edge_offset % 2], \
-                                    [["y", "y", "R", "U", "R'", "U", "R", "U'", "U'", "R'", "U"], ["R", "R", "U'", "R'", "U'", "R", "U", "R", "U", "R", "U'", "R"]][left_edge_offset // 2], \
-                                    [["R'", "U", "R'", "U'", "R'", "U'", "R'", "U", "R", "U", "R", "R"], ["R", "U", "R'", "U'", "R'", "F", "R", "R", "U'", "R'", "U'", "R", "U", "R'", "F'"], []][[0, 0, 1, 0][left_edge_offset]]][[0, 1, 2, 1][right_edge_offset]])
-                solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
-
-                # solving the up side corners
-                solve_moves = []
-                up_corners_in_right_position = []
-                corners_examined = corners[4:]
-                for corner in corners_examined:
-                    corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
-                                    rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
-                                    rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
-                    corner_centres_colors = [rubiks_cube2[int(corner[0][0])][1][1], rubiks_cube2[int(corner[1][0])][1][1], rubiks_cube2[int(corner[2][0])][1][1]]
-                    if (corner_colors[0] in corner_centres_colors) and (corner_colors[1] in corner_centres_colors) and (corner_colors[2] in corner_centres_colors):
-                        up_corners_in_right_position.append(corner)
-                if len(up_corners_in_right_position) == 0:
-                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, ["U", "R", "U'", "L'", "U", "R'", "U'", "L"], False)
-                    solve_moves.append(["U", "R", "U'", "L'", "U", "R'", "U'", "L"])
-                    for corner in corners_examined:
-                        corner_colors = [rubiks_cube2[int(corner[0][0])][int(corner[0][1])][int(corner[0][2])], \
-                                        rubiks_cube2[int(corner[1][0])][int(corner[1][1])][int(corner[1][2])], \
-                                        rubiks_cube2[int(corner[2][0])][int(corner[2][1])][int(corner[2][2])]]
-                        corner_centres_colors = [rubiks_cube2[int(corner[0][0])][1][1], rubiks_cube2[int(corner[1][0])][1][1], rubiks_cube2[int(corner[2][0])][1][1]]
-                        if (corner_colors[0] in corner_centres_colors) and (corner_colors[1] in corner_centres_colors) and (corner_colors[2] in corner_centres_colors):
-                            corner_in_right_position = corner
-                            break
-                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])], False)
-                    solve_moves.append([[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])])
-                elif len(up_corners_in_right_position) == 1:
-                    corner_in_right_position = up_corners_in_right_position[0]
-                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])], False)
-                    solve_moves.append([[], ["y"], ["y", "y"], ["y'"]][["322", "302", "300", "320"].index(corner_in_right_position[0])])
-                right_back_corner_centres_colors = [rubiks_cube2[3][1][1], rubiks_cube2[4][1][1], rubiks_cube2[0][1][1]]
-                if len(up_corners_in_right_position) != 4:
-                    position_index = [True, False].index((rubiks_cube2[3][2][0] in right_back_corner_centres_colors) and (rubiks_cube2[5][0][0] in right_back_corner_centres_colors) and (rubiks_cube2[2][2][2] in right_back_corner_centres_colors))
-                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [["U", "R", "U'", "L'", "U", "R'", "U'", "L"], ["L'", "U", "R", "U'", "L", "U", "R'", "U'"]][position_index], False)
-                    solve_moves.append([["U", "R", "U'", "L'", "U", "R'", "U'", "L"], ["L'", "U", "R", "U'", "L", "U", "R'", "U'"]][position_index])
-                for k in range(4):
-                    orientation_index = [rubiks_cube2[3][2][2], rubiks_cube2[5][0][2], rubiks_cube2[4][2][0]].index(final_solved_color)
-                    rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], 4 * ["R'", "D'", "R", "D"], 2 * ["R'", "D'", "R", "D"]][orientation_index] + ["U'"], False)
-                    solve_moves.append([[], 4 * ["R'", "D'", "R", "D"], 2 * ["R'", "D'", "R", "D"]][orientation_index] + ["U'"])
-                up_side_offset = middle_centres.index(rubiks_cube2[5][1][1]) - middle_centres.index(rubiks_cube2[5][0][1])
-                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [[], ["U"], ["U", "U"], ["U'"]][up_side_offset], False)
-                solve_moves.append([[], ["U"], ["U", "U"], ["U'"]][up_side_offset])
-                solve_moves2.append([move for k in range(len(solve_moves)) for move in solve_moves[k]])
-
-                # write and show solution
-                if self.cube_is_solved(rubiks_cube2):
-                    self.down_area_background.delete("all")
-                    solving_notes = ["Solving {} cross".format(self.cube_colors[["b", "y", "o", "w", "r", "g"].index(initial_solved_color)]), \
-                                    "Solving down corners", "Solving middle edges", \
-                                    "Solving {} cross".format(self.cube_colors[["b", "y", "o", "w", "r", "g"].index(final_solved_color)]), \
-                                    "Solving up corners"]
-                    row_chars = 50
-                    line_offset = 0
-                    for k in range(len(solve_moves2)):
-                        solve_moves2[k] = self.improve_moves_sequence(solve_moves2[k])
-                        self.down_area_background.create_text(10, 40 + 15 * (k + line_offset), text = solving_notes[k] + " ({} moves):".format(len(solve_moves2[k])), font = "Arial 10 bold", fill = "purple", anchor = tk.NW)
-                        for index1 in range(len(solve_moves2[k]) // row_chars + 1):
-                            index2 = [len(solve_moves2[k]), row_chars * index1 + row_chars][[True, False].index(len(solve_moves2[k]) // row_chars == 0)]
-                            self.down_area_background.create_text(250, 40 + 15 * (k + index1 + line_offset), text = solve_moves2[k][(row_chars * index1) : index2], font = "Arial 10 italic bold", fill = "darkblue", anchor = tk.NW)
-                        if len(solve_moves2[k]) // row_chars != 0:
-                            line_offset += 1
-                    self.auto_solve_moves_seq = solve_moves2[0] + solve_moves2[1] + solve_moves2[2] + solve_moves2[3] + solve_moves2[4]
-                    self.down_area_background.create_text(self.down_area_background_width / 2, 20, text = "Solve ({} moves in total):".format(len(self.auto_solve_moves_seq)), font = "Calibri 18 bold", fill = "black")
+                                    solve_moves2[CFOP_stage].append(move)
+                                rubiks_cube2 = self.make_moves_sequence(rubiks_cube2, [move], False)
+                        elif solve_method_choose == "Kociemba":
+                            rubiks_cube2 = self.make_moves_sequence(self.rubiks_cube, solve_moves, False)
+                        # write CFOP and Kociemba solutions
+                        if self.cube_is_solved(rubiks_cube2):
+                            self.down_area_background.delete("all")
+                            if solve_method_choose == "CFOP":
+                                solving_notes = ["Cross - white cross", "F2L - First 2 Layers", "OLL - Orient Last Layer", "PLL - Permute Last Layer"]
+                                row_chars = 30
+                                line_offset = 0
+                                for k in range(len(solve_moves2)):
+                                    solve_moves2[k] = self.improve_moves_sequence(solve_moves2[k])
+                                    self.down_area_background.create_text(10, 40 + 15 * (k + line_offset), text = solving_notes[k] + " ({} moves):".format(len(solve_moves2[k])), font = "Arial 10 bold", fill = "purple", anchor = tk.NW)
+                                    for index1 in range(len(solve_moves2[k]) // row_chars + 1):
+                                        index2 = [len(solve_moves2[k]), row_chars * index1 + row_chars][[True, False].index(len(solve_moves2[k]) // row_chars == 0)]
+                                        self.down_area_background.create_text(270, 40 + 15 * (k + index1 + line_offset), text = solve_moves2[k][(row_chars * index1) : index2], font = "Arial 10 italic bold", fill = "darkblue", anchor = tk.NW)
+                                    if len(solve_moves2[k]) // row_chars != 0:
+                                        line_offset += 1
+                            if solve_method_choose == "Kociemba":
+                                self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2, text = solve_moves, font = "Arial 20 italic bold", fill = "darkblue")
+                            self.auto_solve_moves_seq = solve_moves[:]
+                        else:
+                            raise
+                        self.auto_solve_moves_seq = solve_moves[:]
+                    # write scramble moves and show solution
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 20, text = f"{solve_method_choose} solve ({len(self.auto_solve_moves_seq)} moves in total):", font = "Calibri 18 bold", fill = "black")
                     self.down_area_background.create_text(10, self.down_area_background_height - 23, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
                     if self.previous_game_state in ["moves_scramble", "self_solve"]:
+                        row_chars = 50
                         for index1 in range(len(self.random_scramble_moves_seq) // row_chars + 1):
                             index2 = [len(self.random_scramble_moves_seq), row_chars * index1 + row_chars][[True, False].index(len(self.random_scramble_moves_seq) // row_chars == 0)]
                             self.down_area_background.create_text(80, self.down_area_background_height - 23 + 10 * index1, text = self.random_scramble_moves_seq[(row_chars * index1) : index2], font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
@@ -811,41 +880,15 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                     self.go_to_replay_next_move_button = menu_button(self.down_area_background, "🡆", "Arial 14 bold", "blue", "yellow", 130, 20, lambda event: self.show_previous_next_solve_move("next", event)).button
                     self.go_to_replay_start_button = menu_button(self.down_area_background, "⏮", "Arial 14 bold", "blue", "yellow", 30, 20, lambda event: self.show_previous_next_solve_move("start", event)).button
                     self.go_to_replay_end_button = menu_button(self.down_area_background, "⏭", "Arial 14 bold", "blue", "yellow", 180, 20, lambda event: self.show_previous_next_solve_move("end", event)).button
-                    ### Kociemba solve ###
-                    moves = []
-                    centres = [side[1][1] for side in self.rubiks_cube]
-                    cube = self.make_moves_sequence(self.rubiks_cube, [["x"], [], ["z'"], ["x", "x"], ["z"], ["x'"]][centres.index("w")], False)
-                    moves.append(["x", "", "z'", "x2", "z", "x'"][centres.index("w")])
-                    centres = [side[1][1] for side in cube]
-                    cube = self.make_moves_sequence(cube, [["y'"], [], [], [], ["y", "y"], ["y"]][centres.index("b")], False)
-                    moves.append(["y'", "", "", "", "y2", "y"][centres.index("b")])
-                    cube_colors = self.get_colors_rubik_solver_library(cube)
-                    moves = moves + utils.solve(cube_colors, "Kociemba")
-                    moves = [str(move) for move in moves]
-                    moves_str = ""
-                    for move in moves:
-                        moves_str += move + " "
-                    self.down_area_background.create_text(self.down_area_background_width, self.down_area_background_height - 20, text = "Kociemba solve:\n{}".format(moves_str), font = "Arial 7 bold", fill = "black", anchor = tk.NE)
-                    ### Kociemba solve ###
                     self.make_moves_sequence(self.rubiks_cube, [""] + self.auto_solve_moves_seq, True)
-                else:
-                    self.buttons_bindings_are_activated = True
-                    self.game_state = self.previous_game_state
-                    self.down_area_background.delete("all")
-                    self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "This cube pattern is not valid!", font = "Arial 20 bold", fill = "brown")
-                    self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.wrong_pattern_text, font = "Arial 14 bold", fill = "brown")
-                    self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
-                    self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
-                    self.same_scramble_cube_button = menu_button(self.down_area_background, "fix scramble", "Arial 10 bold", "red", "yellow", self.down_area_background_width - 200, self.down_area_background_height - 30, self.same_scramble_cube).button
-        except:
-            self.buttons_bindings_are_activated = True
-            self.game_state = self.previous_game_state
-            self.down_area_background.delete("all")
-            self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "This cube pattern is not valid!", font = "Arial 20 bold", fill = "brown")
-            self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.wrong_pattern_text, font = "Arial 14 bold", fill = "brown")
-            self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
-            self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
-            self.same_scramble_cube_button = menu_button(self.down_area_background, "fix scramble", "Arial 10 bold", "red", "yellow", self.down_area_background_width - 200, self.down_area_background_height - 30, self.same_scramble_cube).button
+            except:
+                self.buttons_bindings_are_activated = True
+                self.down_area_background.delete("all")
+                self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "This cube pattern is not valid!", font = "Arial 20 bold", fill = "brown")
+                self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.wrong_pattern_text, font = "Arial 14 bold", fill = "brown")
+                self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
+                self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
+                self.same_scramble_cube_button = menu_button(self.down_area_background, "fix scramble", "Arial 10 bold", "red", "yellow", self.down_area_background_width - 200, self.down_area_background_height - 30, self.same_scramble_cube).button
     def cube_is_solved(self, cube):
         try:
             cube = self.make_moves_sequence(cube, [["x"], [], ["z'"], ["x", "x"], ["z"], ["x'"]][[side[1][1] for side in cube].index("y")], False)
@@ -855,7 +898,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                     for k in range(3):
                         if cube[i][j][k] != cube[i][1][1] or cube[i][1][1] != ["b", "y", "o", "w", "r", "g"][i]:
                             return False
-            if self.game_state == "self_solve":
+            if self.game_state in ["self_solve", "auto_solve"]:
                 self.play_sound("solved_cube_sound", "sound")
             return True
         except: 
@@ -881,7 +924,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                     elif moves_k0_k1_lengths.count(2) == 2:
                         if moves_k0_k1[0][1] == "'" and moves_k0_k1[1][1] == "'":
                             improved_moves_seq.append(moves_k0_k1[0][0] + "2")
-                        elif moves_k0_k1[0][1] == "2" and moves_k0_k1[1][1] == "'":
+                        elif [moves_k0_k1[0][1], moves_k0_k1[1][1]] in [["'", "2"], ["2", "'"]]:
                             improved_moves_seq.append(moves_k0_k1[0][0])
                     improvements_done = True
                 else:
@@ -1002,35 +1045,35 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1), cfdl[1] - 2 * ps1 * math.sin(pa1)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][0], activefill = self.highlight_cube_piece(cf_colors[0][0]), width = borders_width, outline = "black", tags = f"up_left_piece_{cube_side_info}")
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1) + ps2 * math.cos(pa2), cfdl[1] - 2 * ps1 * math.sin(pa1) - ps2 * math.sin(pa2)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][1], activefill = self.highlight_cube_piece(cf_colors[0][1]), width = borders_width, outline = "black", tags = f"up_middle_piece_{cube_side_info}")
         cfdl2 = [cfdl[0] + 2 * ps1 * math.cos(pa1) + 2 * ps2 * math.cos(pa2), cfdl[1] - 2 * ps1 * math.sin(pa1) - 2 * ps2 * math.sin(pa2)]; background.create_polygon([cfdl2[0], cfdl2[1], cfdl2[0] + ps2 * math.cos(pa2), cfdl2[1] - ps2 * math.sin(pa2), cfdl2[0] + ps2 * math.cos(pa2) + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1) - ps2 * math.sin(pa2), cfdl2[0] + ps1 * math.cos(pa1), cfdl2[1] - ps1 * math.sin(pa1)], fill = cf_colors[0][2], activefill = self.highlight_cube_piece(cf_colors[0][2]), width = borders_width, outline = "black", tags = f"up_right_piece_{cube_side_info}")
-        background.tag_unbind(f"down_left_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"down_middle_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"down_right_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"left_middle_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"centre_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"right_middle_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"up_left_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"up_middle_piece_{cube_side_info}", '<Button-1>')
-        background.tag_unbind(f"up_right_piece_{cube_side_info}", '<Button-1>')
+        background.tag_unbind(f"down_left_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"down_middle_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"down_right_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"left_middle_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"centre_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"right_middle_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"up_left_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"up_middle_piece_{cube_side_info}", "<Button-1>")
+        background.tag_unbind(f"up_right_piece_{cube_side_info}", "<Button-1>")
         if self.game_state == "draw_scramble" and tags_are_binded:
-            background.tag_bind(f"down_left_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}20", event))
-            background.tag_bind(f"down_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}21", event))
-            background.tag_bind(f"down_right_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}22", event))
-            background.tag_bind(f"left_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}10", event))
-            background.tag_bind(f"centre_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}11", event))
-            background.tag_bind(f"right_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}12", event))
-            background.tag_bind(f"up_left_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}00", event))
-            background.tag_bind(f"up_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}01", event))
-            background.tag_bind(f"up_right_piece_{cube_side_info}", '<Button-1>', lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}02", event))
+            background.tag_bind(f"down_left_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}20", event))
+            background.tag_bind(f"down_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}21", event))
+            background.tag_bind(f"down_right_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}22", event))
+            background.tag_bind(f"left_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}10", event))
+            background.tag_bind(f"centre_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}11", event))
+            background.tag_bind(f"right_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}12", event))
+            background.tag_bind(f"up_left_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}00", event))
+            background.tag_bind(f"up_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}01", event))
+            background.tag_bind(f"up_right_piece_{cube_side_info}", "<Button-1>", lambda event: self.draw_scramble_piece_pressed(background, f"{cube_side_info}02", event))
         elif self.game_state != "draw_scramble" and tags_are_binded:
-            background.tag_bind(f"down_left_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}20", event))
-            background.tag_bind(f"down_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}21", event))
-            background.tag_bind(f"down_right_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}22", event))
-            background.tag_bind(f"left_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}10", event))
-            background.tag_bind(f"centre_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}11", event))
-            background.tag_bind(f"right_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}12", event))
-            background.tag_bind(f"up_left_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}00", event))
-            background.tag_bind(f"up_middle_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}01", event))
-            background.tag_bind(f"up_right_piece_{cube_side_info}", '<Button-1>', lambda event: self.cube_moves_mouse_events(f"{cube_side_info}02", event))
+            background.tag_bind(f"down_left_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}20", event))
+            background.tag_bind(f"down_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}21", event))
+            background.tag_bind(f"down_right_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}22", event))
+            background.tag_bind(f"left_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}10", event))
+            background.tag_bind(f"centre_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}11", event))
+            background.tag_bind(f"right_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}12", event))
+            background.tag_bind(f"up_left_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}00", event))
+            background.tag_bind(f"up_middle_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}01", event))
+            background.tag_bind(f"up_right_piece_{cube_side_info}", "<Button-1>", lambda event: self.cube_moves_mouse_events(f"{cube_side_info}02", event))
     def draw_scramble_piece_pressed(self, background, cube_side_info, event):
         adjust_cube_view_moves_copy = self.adjust_cube_view_moves[:]
         self.reset_cube_view()
@@ -1048,7 +1091,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.make_cube_graphics(self.rubiks_cube, None)
     def highlight_cube_piece(self, color):
         if self.game_state != "draw_scramble":
-            return ["#0000aa", "#cccc00", "#cd8500", "#cccccc", "#aa0000", "#00aa00"][self.cube_colors.index(color)]
+            return ["#0000aa", "#cccc00", "#cd8500", "#cccccc", "#aa0000", "#00aa00", "cyan"][(self.cube_colors + ["cyan"]).index(color)]
         else:
             return self.chosen_draw_color
     def make_cube_graphics(self, main_cube, move):
