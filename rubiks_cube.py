@@ -20,11 +20,11 @@ class rubiks_cube():
         self.down_area_background_height = self.cube_background_height / 5 + 50
         self.menu_background_width = self.cube_background_width / 3
         self.menu_background_height = self.cube_background_height + self.down_area_background_height
-        self.menu_background = tk.Frame(root, width = self.menu_background_width, height = self.menu_background_height, bg = "black", bd = 0, relief = "solid")
+        self.menu_background = tk.Frame(self.root, width = self.menu_background_width, height = self.menu_background_height, bg = "black", bd = 0, relief = "solid")
         self.menu_background.grid(row = 0, column = 0, rowspan = 2, sticky = tk.NSEW)
-        self.cube_background = tk.Canvas(root, width = self.cube_background_width, height = self.cube_background_height, bg = "cyan", bd = 0, relief = "solid")
+        self.cube_background = tk.Canvas(self.root, width = self.cube_background_width, height = self.cube_background_height, bg = "cyan", bd = 0, relief = "solid")
         self.cube_background.grid(row = 0, column = 1, sticky = tk.NSEW)
-        self.down_area_background = tk.Canvas(root, width = self.down_area_background_width, height = self.down_area_background_height, bg = "yellow", bd = 0, relief = "solid")
+        self.down_area_background = tk.Canvas(self.root, width = self.down_area_background_width, height = self.down_area_background_height, bg = "yellow", bd = 0, relief = "solid")
         self.down_area_background.grid(row = 1, column = 1, sticky = tk.NSEW)
         
         # variables for visible cube
@@ -864,7 +864,6 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                             self.auto_solve_moves_seq = solve_moves[:]
                         else:
                             raise
-                        self.auto_solve_moves_seq = solve_moves[:]
                     # write scramble moves and show solution
                     self.down_area_background.create_text(self.down_area_background_width / 2, 20, text = f"{solve_method_choose} solve ({len(self.auto_solve_moves_seq)} moves in total):", font = "Calibri 18 bold", fill = "black")
                     self.down_area_background.create_text(10, self.down_area_background_height - 23, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
