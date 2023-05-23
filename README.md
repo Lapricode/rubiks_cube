@@ -5,6 +5,8 @@ The program creates a virtual cube. You can srcamble the cube or draw a pattern 
 
 Try it if you want.
 
+![image](https://github.com/Lapricode/rubiks_cube/assets/91993549/a3e9b5d3-ea56-4060-8108-be3d0fe34685)
+
 ![image](https://github.com/Lapricode/rubiks_cube/assets/91993549/14c3ff3c-8beb-439c-9195-f9d9256dd7b0)
 
 Python libraries needed: random, math, os, time, tkinter, pygame, pillow, rubik_solver
