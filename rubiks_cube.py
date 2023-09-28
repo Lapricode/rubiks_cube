@@ -435,7 +435,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.instructions_background.create_text(self.cube_background_width / 2, 40, text = "Cube notation", font = "Arial 30 bold italic", fill = "darkblue")
         self.cube_notation_picture = Image.open(os.getcwd() + "/rubiks_cube_notation.jpg")
         reduction_factor = 3 / 4
-        self.cube_notation_picture = self.cube_notation_picture.resize((int(reduction_factor * self.cube_background_width), int(reduction_factor * self.cube_background_width * self.cube_notation_picture.height / self.cube_notation_picture.width)), Image.ANTIALIAS)
+        self.cube_notation_picture = self.cube_notation_picture.resize((int(reduction_factor * self.cube_background_width), int(reduction_factor * self.cube_background_width * self.cube_notation_picture.height / self.cube_notation_picture.width)), Image.LANCZOS)
         self.cube_notation_picture = ImageTk.PhotoImage(self.cube_notation_picture)
         self.instructions_background.create_image(self.cube_background_width / 2, self.cube_notation_picture.height() / 2 + 80, image = self.cube_notation_picture)
         self.instructions_background.create_text(20, self.cube_notation_picture.height() + 120, text = self.cube_notation_text, font = "Calibri 15 bold", fill = "darkblue", anchor = tk.NW)
