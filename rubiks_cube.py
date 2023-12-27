@@ -94,47 +94,60 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.replay_mode_is_activated = False
         self.moves_pointer = 0
         self.sound_is_activated = True
-        
+        self.default_menus_font, self.menus_font = 30, 30
+        self.default_options_font, self.options_font = 18, 18
+        self.default_buttons_font, self.buttons_font = 20, 20
+        self.font_ratio = 1.0
+        self.font_ratio_matrix = [0.8, 0.9, 1.0, 1.1, 1.2]
+        self.menu_elements_offset = 50
+        self.menu_elements_offset_matrix = [40, 50, 60, 70]
+
+        self.create_menus()
+        self.reset_game()
+    
+    def create_menus(self):
         # menus
-        self.reset_button = menu_button(self.menu_background, "reset", "Arial 20 bold", "white", "black", self.menu_background_width / 2, 40, self.reset_game).button
-        self.show_instructions_button = menu_button(self.menu_background, "ⓘ", "Arial 20 bold", "white", "black", 25, 25, self.show_instructions).button
-        self.sound_button = menu_button(self.menu_background, "🔊", "Arial 20 bold", "white", "black", self.menu_background_width - 25, 20, self.enable_disable_sound).button
+        self.menu_background.destroy()
+        self.menu_background = tk.Frame(self.root, width = self.menu_background_width, height = self.menu_background_height, bg = "black", bd = 0, relief = "solid")
+        self.menu_background.grid(row = 0, column = 0, rowspan = 2, sticky = tk.NSEW)
+        self.reset_button = menu_button(self.menu_background, "reset", "Arial "+str(self.buttons_font)+" bold", "white", "black", self.menu_background_width / 2, 40, self.reset_game).button
+        self.show_instructions_button = menu_button(self.menu_background, "ⓘ", "Arial "+str(self.buttons_font)+" bold", "white", "black", 25, 25, self.show_instructions).button
+        self.sound_button = menu_button(self.menu_background, "🔊", "Arial "+str(self.buttons_font)+" bold", "white", "black", 70, 25, self.enable_disable_sound).button
+        self.adjust_font_size_button = menu_button(self.menu_background, "Aa", "Arial "+str(self.buttons_font)+" bold", "white", "black", self.menu_background_width-70, 25, self.adjust_font_size).button
+        self.menu_elements_offset_button = menu_button(self.menu_background, "-|-", "Arial "+str(self.buttons_font)+" bold", "white", "black", self.menu_background_width-25, 25, self.adjust_menu_elements_offset).button
         menu_label(self.menu_background, "Created by Printzios Lampros.", "Times 15 bold", "white", "black", self.menu_background_width / 2, self.menu_background_height - 10).label
 
         # cube graphics menu
-        cube_graphics_menu_cors = [self.menu_background_width / 2, 100]
-        first_element_yoffset = 50
-        self.cube_graphics_menu_label = menu_label(self.menu_background, "Cube graphics:", "Times 30 bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1]).label
-        self.borders_width_label = menu_label(self.menu_background, "borders width:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 20, cube_graphics_menu_cors[1] + first_element_yoffset).label
-        self.borders_width_button = menu_button(self.menu_background, self.borders_width, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 90, cube_graphics_menu_cors[1] + first_element_yoffset, self.change_game_settings_cube_graphics).button
-        self.sides_distortion_label = menu_label(self.menu_background, "sides distortion:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + first_element_yoffset + 40).label
-        self.sides_distortion_button = menu_button(self.menu_background, self.sides_distortion, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 100, cube_graphics_menu_cors[1] + first_element_yoffset + 40, self.change_game_settings_cube_graphics).button
-        self.hidden_sides_visibility_label = menu_label(self.menu_background, "hidden sides:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + first_element_yoffset + 80).label
-        self.hidden_sides_visibility_button = menu_button(self.menu_background, self.hidden_sides_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + first_element_yoffset + 80, self.change_game_settings_cube_graphics).button
-        self.axis_visibility_label = menu_label(self.menu_background, "3d axis:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + first_element_yoffset + 120).label
-        self.axis_visibility_button = menu_button(self.menu_background, self.axis_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 45, cube_graphics_menu_cors[1] + first_element_yoffset + 120, self.change_game_settings_cube_graphics).button
-        self.scramble_pattern_visibility_label = menu_label(self.menu_background, "scramble pattern:", "Arial 18 bold", "red", "black", cube_graphics_menu_cors[0] - 25, cube_graphics_menu_cors[1] + first_element_yoffset + 160).label
-        self.scramble_pattern_visibility_button = menu_button(self.menu_background, self.scramble_pattern_visibility, "Arial 20 bold", "white", "black", cube_graphics_menu_cors[0] + 105, cube_graphics_menu_cors[1] + first_element_yoffset + 160, self.change_game_settings_cube_graphics).button
+        cube_graphics_menu_cors = [self.menu_background_width / 2, 50 + self.menu_elements_offset]
+        self.cube_graphics_menu_label = menu_label(self.menu_background, "Cube graphics:", "Times "+str(self.menus_font)+" bold", "yellow", "black", cube_graphics_menu_cors[0], cube_graphics_menu_cors[1] + self.menu_elements_offset-50).label
+        self.borders_width_label = menu_label(self.menu_background, "borders width:", "Arial "+str(self.options_font)+" bold", "red", "black", cube_graphics_menu_cors[0] - 20, cube_graphics_menu_cors[1] + self.menu_elements_offset).label
+        self.borders_width_button = menu_button(self.menu_background, self.borders_width, "Arial "+str(self.buttons_font)+" bold", "white", "black", cube_graphics_menu_cors[0] + 90, cube_graphics_menu_cors[1] + self.menu_elements_offset, self.change_game_settings_cube_graphics).button
+        self.sides_distortion_label = menu_label(self.menu_background, "sides distortion:", "Arial "+str(self.options_font)+" bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + self.menu_elements_offset + 40).label
+        self.sides_distortion_button = menu_button(self.menu_background, self.sides_distortion, "Arial "+str(self.buttons_font)+" bold", "white", "black", cube_graphics_menu_cors[0] + 100, cube_graphics_menu_cors[1] + self.menu_elements_offset + 40, self.change_game_settings_cube_graphics).button
+        self.hidden_sides_visibility_label = menu_label(self.menu_background, "hidden sides:", "Arial "+str(self.options_font)+" bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + self.menu_elements_offset + 80).label
+        self.hidden_sides_visibility_button = menu_button(self.menu_background, self.hidden_sides_visibility, "Arial "+str(self.buttons_font)+" bold", "white", "black", cube_graphics_menu_cors[0] + 80, cube_graphics_menu_cors[1] + self.menu_elements_offset + 80, self.change_game_settings_cube_graphics).button
+        self.axis_visibility_label = menu_label(self.menu_background, "3d axis:", "Arial "+str(self.options_font)+" bold", "red", "black", cube_graphics_menu_cors[0] - 30, cube_graphics_menu_cors[1] + self.menu_elements_offset + 120).label
+        self.axis_visibility_button = menu_button(self.menu_background, self.axis_visibility, "Arial "+str(self.buttons_font)+" bold", "white", "black", cube_graphics_menu_cors[0] + 45, cube_graphics_menu_cors[1] + self.menu_elements_offset + 120, self.change_game_settings_cube_graphics).button
+        self.scramble_pattern_visibility_label = menu_label(self.menu_background, "scramble pattern:", "Arial "+str(self.options_font)+" bold", "red", "black", cube_graphics_menu_cors[0] - 25, cube_graphics_menu_cors[1] + self.menu_elements_offset + 160).label
+        self.scramble_pattern_visibility_button = menu_button(self.menu_background, self.scramble_pattern_visibility, "Arial "+str(self.buttons_font)+" bold", "white", "black", cube_graphics_menu_cors[0] + 105, cube_graphics_menu_cors[1] + self.menu_elements_offset + 160, self.change_game_settings_cube_graphics).button
         self.cube_dimensions_button = menu_button(self.cube_background, self.cube_dimensions, "Arial 25 bold", "darkblue", "cyan", 50, self.cube_background_height - 40, self.change_game_settings_cube_graphics).button
 
         # scramble cube menu
-        scramble_cube_menu_cors = [self.menu_background_width / 2, 380]
-        first_element_yoffset = 50
-        self.scramble_cube_menu_label = menu_label(self.menu_background, "Scramble cube:", "Times 30 bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1]).label
-        self.scramble_moves_speed_label = menu_label(self.menu_background, "time/move (sec):", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + first_element_yoffset).label
-        self.scramble_moves_speed_button = menu_button(self.menu_background, self.scramble_moves_speed, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 100, scramble_cube_menu_cors[1] + first_element_yoffset, self.change_game_settings_cube_graphics).button
-        self.moves_number_label = menu_label(self.menu_background, "moves number:", "Arial 18 bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + first_element_yoffset + 40).label
-        self.moves_number_button = menu_button(self.menu_background, self.random_scramble_moves, "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0] + 95, scramble_cube_menu_cors[1] + first_element_yoffset + 40, self.change_game_settings_cube_graphics).button
-        self.scramble_cube_button = menu_button(self.menu_background, "random scramble", "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + first_element_yoffset + 80, self.moves_scramble_cube).button
-        self.draw_scramble_pattern_button = menu_button(self.menu_background, "draw pattern", "Arial 20 bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + first_element_yoffset + 120, self.draw_scramble_cube).button
+        scramble_cube_menu_cors = [self.menu_background_width / 2, 330 + self.menu_elements_offset]
+        self.scramble_cube_menu_label = menu_label(self.menu_background, "Scramble cube:", "Times "+str(self.menus_font)+" bold", "yellow", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + self.menu_elements_offset-50).label
+        self.scramble_moves_speed_label = menu_label(self.menu_background, "time/move (sec):", "Arial "+str(self.options_font)+" bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + self.menu_elements_offset).label
+        self.scramble_moves_speed_button = menu_button(self.menu_background, self.scramble_moves_speed, "Arial "+str(self.buttons_font)+" bold", "white", "black", scramble_cube_menu_cors[0] + 100, scramble_cube_menu_cors[1] + self.menu_elements_offset, self.change_game_settings_cube_graphics).button
+        self.moves_number_label = menu_label(self.menu_background, "moves number:", "Arial "+str(self.options_font)+" bold", "red", "black", scramble_cube_menu_cors[0] - 25, scramble_cube_menu_cors[1] + self.menu_elements_offset + 40).label
+        self.moves_number_button = menu_button(self.menu_background, self.random_scramble_moves, "Arial "+str(self.buttons_font)+" bold", "white", "black", scramble_cube_menu_cors[0] + 95, scramble_cube_menu_cors[1] + self.menu_elements_offset + 40, self.change_game_settings_cube_graphics).button
+        self.scramble_cube_button = menu_button(self.menu_background, "random scramble", "Arial "+str(self.buttons_font)+" bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + self.menu_elements_offset + 80, self.moves_scramble_cube).button
+        self.draw_scramble_pattern_button = menu_button(self.menu_background, "draw pattern", "Arial "+str(self.buttons_font)+" bold", "white", "black", scramble_cube_menu_cors[0], scramble_cube_menu_cors[1] + self.menu_elements_offset + 120, self.draw_scramble_cube).button
 
         # solve cube
-        solve_cube_menu_cors = [self.menu_background_width / 2, 620]
-        first_element_yoffset = 50
-        self.solve_cube_menu_label = menu_label(self.menu_background, "Solve cube:", "Times 30 bold", "yellow", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1]).label
-        self.solve_moves_speed_label = menu_label(self.menu_background, "time/move (sec):", "Arial 18 bold", "red", "black", solve_cube_menu_cors[0] - 25, solve_cube_menu_cors[1] + first_element_yoffset).label
-        self.solve_moves_speed_button = menu_button(self.menu_background, self.solve_moves_speed, "Arial 20 bold", "white", "black", solve_cube_menu_cors[0] + 100, solve_cube_menu_cors[1] + first_element_yoffset, self.change_game_settings_cube_graphics).button
-        self.auto_solve_cube_button = menu_button(self.menu_background, "solve", "Arial 20 bold", "white", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1] + first_element_yoffset + 40, lambda event: self.auto_solve_cube("choose_method", None, None, event)).button
+        solve_cube_menu_cors = [self.menu_background_width / 2, 570 + self.menu_elements_offset]
+        self.solve_cube_menu_label = menu_label(self.menu_background, "Solve cube:", "Times "+str(self.menus_font)+" bold", "yellow", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1] + self.menu_elements_offset-50).label
+        self.solve_moves_speed_label = menu_label(self.menu_background, "time/move (sec):", "Arial "+str(self.options_font)+" bold", "red", "black", solve_cube_menu_cors[0] - 25, solve_cube_menu_cors[1] + self.menu_elements_offset).label
+        self.solve_moves_speed_button = menu_button(self.menu_background, self.solve_moves_speed, "Arial "+str(self.buttons_font)+" bold", "white", "black", solve_cube_menu_cors[0] + 100, solve_cube_menu_cors[1] + self.menu_elements_offset, self.change_game_settings_cube_graphics).button
+        self.auto_solve_cube_button = menu_button(self.menu_background, "solve", "Arial "+str(self.buttons_font)+" bold", "white", "black", solve_cube_menu_cors[0], solve_cube_menu_cors[1] + self.menu_elements_offset + 40, lambda event: self.auto_solve_cube("choose_method", None, None, event)).button
 
         # bindings
         self.buttons_bindings_are_activated = True
@@ -183,8 +196,6 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.root.bind("<Key-3>", lambda event: self.show_previous_next_solve_move("next", event))
         self.root.bind("<Key-0>", lambda event: self.show_previous_next_solve_move("start", event))
         self.root.bind("<Double-Key-0>", lambda event: self.show_previous_next_solve_move("end", event))
-
-        self.reset_game()
 
     def left(self, cube):
         cube2 = self.copy_cube(cube)
@@ -331,7 +342,6 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             if self.sound_is_activated:
                 self.sound = pygame.mixer.Sound(os.getcwd() + "/game_sounds/" + sound_file + ".wav")
                 self.sound.play()
-
     def change_game_settings_cube_graphics(self, event):
         if event.widget == self.scramble_moves_speed_button:
             self.scramble_moves_speed = self.alternate_matrix_elements(self.moves_speeds_matrix, self.scramble_moves_speed)
@@ -427,6 +437,15 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         else:
             self.sound_button.configure(text = "🔊")
         self.sound_is_activated = not self.sound_is_activated
+    def adjust_font_size(self, event = None):
+        self.font_ratio = self.alternate_matrix_elements(self.font_ratio_matrix, self.font_ratio)
+        self.menus_font = int(self.default_menus_font * self.font_ratio)
+        self.options_font = int(self.default_options_font * self.font_ratio)
+        self.buttons_font = int(self.default_buttons_font * self.font_ratio)
+        self.create_menus()
+    def adjust_menu_elements_offset(self, event = None):
+        self.menu_elements_offset = self.alternate_matrix_elements(self.menu_elements_offset_matrix, self.menu_elements_offset)
+        self.create_menus()
     def show_instructions(self, event = None):
         try: self.instructions_background.destroy()
         except AttributeError: pass
@@ -571,7 +590,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                 if self.cube_is_solved(self.rubiks_cube):
                     if self.game_state != "auto_solve":
                         self.previous_game_state = self.game_state
-                    self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "The cube is already solved!", font = "Arial 20 bold", fill = "brown")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "The cube is already solved!", font = "Arial "+str(self.buttons_font)+" bold", fill = "brown")
                     self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.cube_is_solved_text, font = "Arial 14 bold", fill = "brown")
                     self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
                     if self.previous_game_state == "moves_scramble" or self.previous_game_state == "self_solve":
@@ -586,10 +605,10 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
                     self.previous_game_state = self.game_state
                     self.game_state = "auto_solve"
                     self.make_cube_graphics(self.rubiks_cube, None)
-                    self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Select the solving method you want to be used:", font = "Arial 20 bold", fill = "brown")
-                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 - 10, text = "Beginner's method (simple and slow, many moves needed)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "Beginner")
-                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 25, text = "CFOP method (advanced and fast, used in speedcubing)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "CFOP")
-                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 60, text = "Kociemba's algorithm (the fastest way, 20 moves in average)", font = "Arial 18 bold", fill = "red", activefill = "blue", tags = "Kociemba")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Select the solving method you want to be used:", font = "Arial "+str(self.buttons_font)+" bold", fill = "brown")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 - 10, text = "Beginner's method (simple and slow, many moves needed)", font = "Arial "+str(self.options_font)+" bold", fill = "red", activefill = "blue", tags = "Beginner")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 25, text = "CFOP method (advanced and fast, used in speedcubing)", font = "Arial "+str(self.options_font)+" bold", fill = "red", activefill = "blue", tags = "CFOP")
+                    self.down_area_background.create_text(self.down_area_background_width / 2, self.down_area_background_height / 2 + 60, text = "Kociemba's algorithm (the fastest way, 20 moves in average)", font = "Arial "+str(self.options_font)+" bold", fill = "red", activefill = "blue", tags = "Kociemba")
                     self.down_area_background.tag_bind("Beginner", "<Button-1>", lambda event: self.auto_solve_cube("choose_color", "Beginner", None, event))
                     self.down_area_background.tag_bind("CFOP", "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", "CFOP", None, event))
                     self.down_area_background.tag_bind("Kociemba", "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", "Kociemba", None, event))
@@ -600,7 +619,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             edge_offset = 140
             centre_x_offset = ((self.down_area_background_width - 2 * edge_offset) - 6 * rect_side) / 10
             centre_y_offset = 20
-            self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Choose the cube side you want to be solved first:", font = "Arial 20 bold", fill = "brown")
+            self.down_area_background.create_text(self.down_area_background_width / 2, 30, text = "Choose the cube side you want to be solved first:", font = "Arial "+str(self.buttons_font)+" bold", fill = "brown")
             for k in range(6):
                 self.down_area_background.create_rectangle([edge_offset + (rect_side + 2 * centre_x_offset) * k, self.down_area_background_height / 2 - rect_side / 2 + centre_y_offset, edge_offset + (rect_side + 2 * centre_x_offset) * k + rect_side, self.down_area_background_height / 2 + rect_side / 2 + centre_y_offset], fill = self.cube_colors[k], activefill = "black", width = 5, outline = "black", tags = self.cube_colors[k])
             self.down_area_background.tag_bind(self.cube_colors[0], "<Button-1>", lambda event: self.auto_solve_cube("solve_cube", solve_method_choose, self.cube_colors[0][0], event))
@@ -883,7 +902,7 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
             except:
                 self.buttons_bindings_are_activated = True
                 self.down_area_background.delete("all")
-                self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "This cube pattern is not valid!", font = "Arial 20 bold", fill = "brown")
+                self.down_area_background.create_text(self.down_area_background_width / 2, 40, text = "This cube pattern is not valid!", font = "Arial "+str(self.buttons_font)+" bold", fill = "brown")
                 self.down_area_background.create_text(self.down_area_background_width / 2, 90, text = self.wrong_pattern_text, font = "Arial 14 bold", fill = "brown")
                 self.down_area_background.create_text(90, self.down_area_background_height - 45, text = "Scramble:", font = "Arial 8 bold", fill = "black", anchor = tk.NW)
                 self.down_area_background.create_text(160, self.down_area_background_height - 45, text = "You can see the scrambled cube pattern enabling the cube graphics option \"scramble pattern\".", font = "Arial 8 italic bold", fill = "black", anchor = tk.NW)
