@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import tkinter as tk
 import math
 import random
@@ -7,13 +9,15 @@ import pygame
 from PIL import Image, ImageTk
 from rubik_solver import utils
 
+
 class rubiks_cube():
     def __init__(self, root):
         pygame.init()
         self.root = root
         self.root.geometry("+0+0")
         self.root.title("Rubik's cube")
-        self.root.iconbitmap(os.getcwd() + "/rubiks_cube_icon.ico")
+        self.root.iconphoto(True, tk.PhotoImage(file = os.getcwd() + "/rubiks_cube_icon.png"))
+        # self.root.iconbitmap(os.getcwd() + "/rubiks_cube_icon.ico")
         self.cube_background_width = (2 / 3) * self.root.winfo_screenwidth()
         self.cube_background_height = (3 / 4) * self.root.winfo_screenheight() - 50
         self.down_area_background_width = self.cube_background_width
@@ -94,9 +98,12 @@ pattern\" respectively. Alternatively you can make the same scramble pressing th
         self.replay_mode_is_activated = False
         self.moves_pointer = 0
         self.sound_is_activated = True
-        self.default_menus_font, self.menus_font = 30, 30
-        self.default_options_font, self.options_font = 18, 18
-        self.default_buttons_font, self.buttons_font = 20, 20
+        self.default_menus_font = 20
+        self.menus_font = self.default_menus_font
+        self.default_options_font = 16
+        self.options_font = self.default_options_font
+        self.default_buttons_font = 14
+        self.buttons_font = self.default_buttons_font
         self.font_ratio = 1.0
         self.font_ratio_matrix = [0.8, 0.9, 1.0, 1.1, 1.2]
         self.menu_elements_offset = 50
